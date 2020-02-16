@@ -104,6 +104,10 @@ install(FILES
     ${generated_includes}
     api.h
     control_loop.h
+    correctiq.h
+    correctiq_auto.h
+    correctiq_man.h
+    correctiq_swapiq.h
     count_bits.h
     file_sink_base.h
     lfsr_15_1_0.h

@@ -24,6 +24,7 @@
 #define INCLUDED_ANALOG_PLL_FREQDET_CF_IMPL_H
 
 #include <gnuradio/analog/pll_freqdet_cf.h>
+#include <gnuradio/math.h>
 
 namespace gr {
   namespace analog {

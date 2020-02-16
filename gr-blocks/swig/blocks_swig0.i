@@ -30,6 +30,10 @@
 #include "gnuradio/blocks/annotator_1to1.h"
 #include "gnuradio/blocks/annotator_alltoall.h"
 #include "gnuradio/blocks/annotator_raw.h"
+#include "gnuradio/blocks/correctiq.h"
+#include "gnuradio/blocks/correctiq_man.h"
+#include "gnuradio/blocks/correctiq_auto.h"
+#include "gnuradio/blocks/correctiq_swapiq.h"
 #include "gnuradio/blocks/control_loop.h"
 #include "gnuradio/blocks/copy.h"
 #include "gnuradio/blocks/delay.h"
@@ -56,6 +60,10 @@
 %include "gnuradio/blocks/annotator_1to1.h"
 %include "gnuradio/blocks/annotator_alltoall.h"
 %include "gnuradio/blocks/annotator_raw.h"
+%include "gnuradio/blocks/correctiq.h"
+%include "gnuradio/blocks/correctiq_man.h"
+%include "gnuradio/blocks/correctiq_auto.h"
+%include "gnuradio/blocks/correctiq_swapiq.h"
 %include "gnuradio/blocks/control_loop.h"
 %include "gnuradio/blocks/copy.h"
 %include "gnuradio/blocks/delay.h"
@@ -81,6 +89,10 @@
 GR_SWIG_BLOCK_MAGIC2(blocks, annotator_1to1);
 GR_SWIG_BLOCK_MAGIC2(blocks, annotator_alltoall);
 GR_SWIG_BLOCK_MAGIC2(blocks, annotator_raw);
+GR_SWIG_BLOCK_MAGIC2(blocks, correctiq);
+GR_SWIG_BLOCK_MAGIC2(blocks, correctiq_man);
+GR_SWIG_BLOCK_MAGIC2(blocks, correctiq_auto);
+GR_SWIG_BLOCK_MAGIC2(blocks, swap_iq);
 GR_SWIG_BLOCK_MAGIC2(blocks, copy);
 GR_SWIG_BLOCK_MAGIC2(blocks, delay);
 GR_SWIG_BLOCK_MAGIC2(blocks, endian_swap);

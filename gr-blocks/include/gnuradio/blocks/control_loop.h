@@ -24,6 +24,7 @@
 #define GR_BLOCKS_CONTROL_LOOP
 
 #include <gnuradio/blocks/api.h>
+#include <gnuradio/math.h>
 
 namespace gr {
   namespace blocks {

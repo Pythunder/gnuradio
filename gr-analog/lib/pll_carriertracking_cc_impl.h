@@ -24,6 +24,7 @@
 #define INCLUDED_ANALOG_PLL_CARRIERTRACKING_CC_IMPL_H
 
 #include <gnuradio/analog/pll_carriertracking_cc.h>
+#include <gnuradio/math.h>
 
 namespace gr {
   namespace analog {

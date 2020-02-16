@@ -24,6 +24,7 @@
 #define INCLUDED_GR_SINCOS_H
 
 #include <gnuradio/api.h>
+#include <cmath>
 
 namespace gr {
 
