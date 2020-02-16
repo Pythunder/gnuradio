@@ -142,43 +142,26 @@ STRIP_FROM_PATH        =
 # are normally passed to the compiler using the -I flag.
 
 STRIP_FROM_INC_PATH    = @CMAKE_SOURCE_DIR@/gnuradio-runtime/include \
-                         @CMAKE_BINARY_DIR@/gnuradio-runtime/include \
                          @CMAKE_SOURCE_DIR@/gr-analog/include \
-                         @CMAKE_BINARY_DIR@/gr-analog/include \
+                         @CMAKE_SOURCE_DIR@/gr-atsc/include \
                          @CMAKE_SOURCE_DIR@/gr-audio/include \
-                         @CMAKE_BINARY_DIR@/gr-audio/include \
                          @CMAKE_SOURCE_DIR@/gr-blocks/include \
-                         @CMAKE_BINARY_DIR@/gr-blocks/include \
                          @CMAKE_SOURCE_DIR@/gr-channels/include \
-                         @CMAKE_BINARY_DIR@/gr-channels/include \
+                         @CMAKE_SOURCE_DIR@/gr-comedi/include \
                          @CMAKE_SOURCE_DIR@/gr-digital/include \
-                         @CMAKE_BINARY_DIR@/gr-digital/include \
-                         @CMAKE_SOURCE_DIR@/gr-dtv/include \
-                         @CMAKE_BINARY_DIR@/gr-dtv/include \
+                         @CMAKE_SOURCE_DIR@/gr-fcd/include \
                          @CMAKE_SOURCE_DIR@/gr-fec/include \
-                         @CMAKE_BINARY_DIR@/gr-fec/include \
                          @CMAKE_SOURCE_DIR@/gr-fft/include \
-                         @CMAKE_BINARY_DIR@/gr-fft/include \
                          @CMAKE_SOURCE_DIR@/gr-filter/include \
-                         @CMAKE_BINARY_DIR@/gr-filter/include \
+                         @CMAKE_SOURCE_DIR@/gr-noaa/include \
+                         @CMAKE_SOURCE_DIR@/gr-pager/include \
                          @CMAKE_SOURCE_DIR@/gr-qtgui/include \
-                         @CMAKE_BINARY_DIR@/gr-qtgui/include \
                          @CMAKE_SOURCE_DIR@/gr-trellis/include \
-                         @CMAKE_BINARY_DIR@/gr-trellis/include \
                          @CMAKE_SOURCE_DIR@/gr-uhd/include \
-                         @CMAKE_BINARY_DIR@/gr-uhd/include \
                          @CMAKE_SOURCE_DIR@/gr-video-sdl/include \
-                         @CMAKE_BINARY_DIR@/gr-video-sdl/include \
                          @CMAKE_SOURCE_DIR@/gr-vocoder/include \
-                         @CMAKE_BINARY_DIR@/gr-vocoder/include \
-                         @CMAKE_SOURCE_DIR@/gr-wavelet/include \
-                         @CMAKE_BINARY_DIR@/gr-wavelet/include \
-                         @CMAKE_SOURCE_DIR@/gr-zeromq/include \
-                         @CMAKE_BINARY_DIR@/gr-zeromq/include \
-                         @CMAKE_SOURCE_DIR@/volk/include \
-                         @CMAKE_BINARY_DIR@/volk/include \
-                         @CMAKE_SOURCE_DIR@/volk/tmpl \
-                         @CMAKE_BINARY_DIR@/volk/tmpl
+                         @CMAKE_SOURCE_DIR@/gr-wxgui/include \
+                         @CMAKE_SOURCE_DIR@/volk/include
 
 # If the SHORT_NAMES tag is set to YES, doxygen will generate much shorter
 # (but less readable) file names. This can be useful if your file system
@@ -692,8 +675,7 @@ WARN_LOGFILE           =
 # with spaces.
 
 INPUT                  = @top_srcdir@ \
-                         @top_builddir@ \
-                         @top_srcdir@/docs/doxygen/other/license.dox
+                         @top_builddir@
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding, which is
@@ -726,64 +708,63 @@ RECURSIVE              = YES
 # Note that relative paths are relative to the directory from which doxygen is
 # run.
 
-EXCLUDE                = @abs_top_srcdir@/volk \
-                         @abs_top_builddir@/volk \
-                         @abs_top_builddir@/cmake/msvc \
-                         @abs_top_builddir@/docs/doxygen/html \
+EXCLUDE                = @abs_top_builddir@/docs/doxygen/html \
                          @abs_top_builddir@/docs/doxygen/xml \
                          @abs_top_builddir@/docs/doxygen/other/doxypy.py \
-                         @abs_top_srcdir@/docs/doxygen/other/shared_ptr_docstub.h \
                          @abs_top_builddir@/dtools \
                          @abs_top_builddir@/gnuradio-runtime/lib/runtime/gr_error_handler.cc \
                          @abs_top_builddir@/gnuradio-runtime/swig \
+                         @abs_top_builddir@/gnuradio-runtime/python/build_utils.py \
+                         @abs_top_builddir@/gnuradio-runtime/python/build_utils_codes.py \
                          @abs_top_builddir@/gnuradio-runtime/python/gnuradio/gr/gr_threading.py \
                          @abs_top_builddir@/gnuradio-runtime/python/gnuradio/gr/gr_threading_23.py \
                          @abs_top_builddir@/gnuradio-runtime/python/gnuradio/gr/gr_threading_24.py \
+                         @abs_top_builddir@/gr-atsc/swig/atsc_swig.py \
+                         @abs_top_builddir@/gr-atsc/lib/gen_encoder.py \
+                         @abs_top_builddir@/gr-atsc/python \
+                         @abs_top_builddir@/gr-pager/swig/pager_swig.py \
                          @abs_top_builddir@/gr-trellis/doc \
                          @abs_top_builddir@/gr-trellis/swig/trellis_swig.py \
                          @abs_top_builddir@/gr-video-sdl/swig/video_sdl_swig.py \
+                         @abs_top_builddir@/gr-wxgui/python \
                          @abs_top_builddir@/grc \
                          @abs_top_builddir@/_CPack_Packages \
                          @abs_top_srcdir@/cmake \
                          @abs_top_srcdir@/gr-utils/python/modtool/gr-newmod \
-                         @abs_top_builddir@/gr-utils/python/modtool/gr-newmod \
                          @abs_top_srcdir@/docs/doxygen/doxyxml/example \
+                         @abs_top_srcdir@/docs/sphinx \
                          @abs_top_srcdir@/gnuradio-runtime/lib \
                          @abs_top_builddir@/gnuradio-runtime/lib \
                          @abs_top_srcdir@/gr-analog/lib \
                          @abs_top_builddir@/gr-analog/lib \
+                         @abs_top_srcdir@/gr-atsc/lib \
+                         @abs_top_builddir@/gr-atsc/lib \
                          @abs_top_srcdir@/gr-audio/lib \
                          @abs_top_builddir@/gr-audio/lib \
                          @abs_top_srcdir@/gr-blocks/lib \
                          @abs_top_builddir@/gr-blocks/lib \
                          @abs_top_srcdir@/gr-channels/lib \
                          @abs_top_builddir@/gr-channels/lib \
+                         @abs_top_srcdir@/gr-comedi/lib \
+                         @abs_top_builddir@/gr-comedi/lib \
                          @abs_top_srcdir@/gr-digital/lib \
                          @abs_top_builddir@/gr-digital/lib \
-                         @abs_top_srcdir@/gr-dtv/lib \
-                         @abs_top_builddir@/gr-dtv/lib \
-                         @abs_top_srcdir@/gr-dtv/lib/atsc \
-                         @abs_top_builddir@/gr-dtv/lib/atsc \
-                         @abs_top_srcdir@/gr-dtv/lib/dvb \
-                         @abs_top_builddir@/gr-dtv/lib/dvb \
-                         @abs_top_srcdir@/gr-dtv/lib/dvbs2 \
-                         @abs_top_builddir@/gr-dtv/lib/dvbs2 \
-                         @abs_top_srcdir@/gr-dtv/lib/dvbt2 \
-                         @abs_top_builddir@/gr-dtv/lib/dvbr2 \
+                         @abs_top_srcdir@/gr-fcd/lib \
+                         @abs_top_builddir@/gr-fcd/lib \
                          @abs_top_srcdir@/gr-fec/lib \
                          @abs_top_builddir@/gr-fec/lib \
                          @abs_top_srcdir@/gr-filter/lib \
                          @abs_top_builddir@/gr-filter/lib \
-                         @abs_top_srcdir@/gr-fft/lib \
-                         @abs_top_builddir@/gr-fft/lib \
+                         @abs_top_srcdir@/gr-noaa/lib \
+                         @abs_top_builddir@/gr-noaa/lib \
+                         @abs_top_srcdir@/gr-pager/lib \
+                         @abs_top_builddir@/gr-pager/lib \
                          @abs_top_srcdir@/gr-qtgui/lib \
                          @abs_top_builddir@/gr-qtgui/lib \
                          @abs_top_srcdir@/gr-trellis/lib \
                          @abs_top_builddir@/gr-trellis/lib \
                          @abs_top_srcdir@/gr-uhd/lib \
                          @abs_top_builddir@/gr-uhd/lib \
-                         @abs_top_srcdir@/gr-uhd/examples/c++ \
-                         @abs_top_builddir@/gr-uhd/examples/c++ \
                          @abs_top_srcdir@/gr-utils/lib \
                          @abs_top_builddir@/gr-utils/lib \
                          @abs_top_srcdir@/gr-video-sdl/lib \
@@ -792,11 +773,8 @@ EXCLUDE                = @abs_top_srcdir@/volk \
                          @abs_top_builddir@/gr-vocoder/lib \
                          @abs_top_srcdir@/gr-wavelet/lib \
                          @abs_top_builddir@/gr-wavelet/lib \
-                         @abs_top_srcdir@/gr-zeromq/lib \
-                         @abs_top_builddir@/gr-zeromq/lib \
-                         @abs_top_srcdir@/volk/cmake/msvc \
-                         @abs_top_builddir@/volk/cmake/msvc \
-                         @abs_top_srcdir@/volk/kernels/volk/volk_8u_conv_k7_r2puppet_8u.h
+                         @abs_top_srcdir@/gr-wxgui/lib \
+                         @abs_top_builddir@/gr-wxgui/lib
 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or
 # directories that are symbolic links (a Unix file system feature) are excluded
@@ -815,6 +793,7 @@ EXCLUDE_PATTERNS       = */.deps/* \
                          */.svn/* \
                          */CVS/* \
                          */__init__.py \
+                         */gr-atsc/src/lib/Gr* \
                          */moc_*.cc \
                          */qa_*.cc \
                          */qa_*.h \
@@ -1048,7 +1027,7 @@ HTML_STYLESHEET        =
 # user-defined cascading style sheet that is included after the standard
 # style sheets created by doxygen. Using this option one can overrule
 # certain style aspects. This is preferred over using HTML_STYLESHEET
-# since it does not replace the standard style sheet and is therefore more
+# since it does not replace the standard style sheet and is therefor more
 # robust against future updates. Doxygen will copy the style sheet file to
 # the output directory.
 
@@ -1092,7 +1071,7 @@ HTML_COLORSTYLE_GAMMA  = 80
 # page will contain the date and time when the page was generated. Setting
 # this to NO can help when comparing the output of multiple runs.
 
-HTML_TIMESTAMP         = NO
+HTML_TIMESTAMP         = YES
 
 # If the HTML_DYNAMIC_SECTIONS tag is set to YES then the generated HTML
 # documentation will contain sections that can be hidden and shown after the
@@ -1458,7 +1437,7 @@ PAPER_TYPE             = letter
 # The EXTRA_PACKAGES tag can be to specify one or more names of LaTeX
 # packages that should be included in the LaTeX output.
 
-EXTRA_PACKAGES         = amsmath,amssymb
+EXTRA_PACKAGES         =
 
 # The LATEX_HEADER tag can be used to specify a personal LaTeX header for
 # the generated latex document. The header should contain everything until
@@ -1605,6 +1584,18 @@ GENERATE_XML           = @enable_xml_docs@
 # put in front of it. If left blank `xml' will be used as the default path.
 
 XML_OUTPUT             = xml
+
+# The XML_SCHEMA tag can be used to specify an XML schema,
+# which can be used by a validating XML parser to check the
+# syntax of the XML files.
+
+XML_SCHEMA             =
+
+# The XML_DTD tag can be used to specify an XML DTD,
+# which can be used by a validating XML parser to check the
+# syntax of the XML files.
+
+XML_DTD                =
 
 # If the XML_PROGRAMLISTING tag is set to YES Doxygen will
 # dump the program listings (including syntax highlighting
@@ -1783,6 +1774,11 @@ EXTERNAL_GROUPS        = YES
 
 EXTERNAL_PAGES         = YES
 
+# The PERL_PATH should be the absolute path and name of the perl script
+# interpreter (i.e. the result of `which perl').
+
+PERL_PATH              = /usr/bin/perl
+
 #---------------------------------------------------------------------------
 # Configuration options related to the dot tool
 #---------------------------------------------------------------------------
@@ -1794,6 +1790,15 @@ EXTERNAL_PAGES         = YES
 # install and use dot, since it yields more powerful graphs.
 
 CLASS_DIAGRAMS         = YES
+
+# You can define message sequence charts within doxygen comments using the \msc
+# command. Doxygen will then run the mscgen tool (see
+# http://www.mcternan.me.uk/mscgen/) to produce the chart and insert it in the
+# documentation. The MSCGEN_PATH tag allows you to specify the directory where
+# the mscgen tool resides. If left empty the tool is assumed to be found in the
+# default search path.
+
+MSCGEN_PATH            =
 
 # If set to YES, the inheritance and collaboration graphs will hide
 # inheritance and usage relations if the target is undocumented
@@ -1959,7 +1964,7 @@ MSCFILE_DIRS           =
 # DOT_GRAPH_MAX_NODES then the graph will not be shown at all. Also note
 # that the size of a graph can be further restricted by MAX_DOT_GRAPH_DEPTH.
 
-DOT_GRAPH_MAX_NODES    = 500
+DOT_GRAPH_MAX_NODES    = 50
 
 # The MAX_DOT_GRAPH_DEPTH tag can be used to set the maximum depth of the
 # graphs generated by dot. A depth value of 3 means that only nodes reachable

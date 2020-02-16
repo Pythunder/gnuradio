@@ -4,8 +4,20 @@
  *
  * This file is part of GNU Radio
  *
- * SPDX-License-Identifier: GPL-3.0-or-later
+ * GNU Radio is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3, or (at your option)
+ * any later version.
  *
+ * GNU Radio is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with GNU Radio; see the file COPYING.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street,
+ * Boston, MA 02110-1301, USA.
  */
 
 #pragma SWIG nowarn=401
@@ -14,6 +26,7 @@
 %include "stdint.i"
 
 %{
+#include <boost/intrusive_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/any.hpp>
 #include <complex>
@@ -23,23 +36,6 @@
 #include <iosfwd>
 #include <stdexcept>
 #include <pmt/pmt.h>
-
-namespace pmt {
-  // Wrapper for serialize_str(), so we always have raw byte strings
-  std::vector<uint8_t> _serialize_str_u8(pmt_t obj)
-  {
-    std::string serialized_str(serialize_str(obj));
-    return std::vector<uint8_t>(serialized_str.begin(), serialized_str.end());
-  }
-
-  // Wrapper for deserialize_str(), so we always have raw byte strings
-  pmt_t _deserialize_str_u8(std::vector<uint8_t> py_str)
-  {
-    std::string cpp_str(py_str.begin(), py_str.end());
-    return deserialize_str(cpp_str);
-  }
-} /* namespace pmt */
-
 %}
 
 %feature("autodoc","1");
@@ -51,7 +47,6 @@ namespace pmt {
 
 %include <std_complex.i>
 %include <std_vector.i>
-%include <gr_shared_ptr.i>
 %template(pmt_vector_int8) std::vector<int8_t>;
 %template(pmt_vector_uint8) std::vector<uint8_t>;
 %template(pmt_vector_int16) std::vector<int16_t>;
@@ -67,26 +62,29 @@ namespace pmt {
 // Language independent exception handler
 ////////////////////////////////////////////////////////////////////////
 
-%template(swig_pmt_ptr) boost::shared_ptr<pmt::pmt_base>;
+// Template intrusive_ptr for Swig to avoid dereferencing issues
+namespace pmt{
+    class pmt_base;
+}
+//%import <intrusive_ptr.i>
+%import <gr_intrusive_ptr.i>
+%template(swig_int_ptr) boost::intrusive_ptr<pmt::pmt_base>;
 
 namespace pmt{
-  class pmt_base;
-  typedef boost::shared_ptr<pmt::pmt_base> pmt_t;
 
+  typedef boost::intrusive_ptr<pmt_base> pmt_t;
+
+  // Allows Python to directly print a PMT object
   %pythoncode
   %{
-    swig_pmt_ptr.__repr__ = lambda self: write_string(self)
+    swig_int_ptr.__repr__ = lambda self: write_string(self)
   %}
 
-  pmt_t get_PMT_NIL();
-  pmt_t get_PMT_T();
-  pmt_t get_PMT_F();
-  pmt_t get_PMT_EOF();
 
-  #define PMT_NIL get_PMT_NIL()
-  #define PMT_T get_PMT_T()
-  #define PMT_F get_PMT_F()
-  #define PMT_EOF get_PMT_EOF()
+  extern const pmt_t PMT_T;
+  extern const pmt_t PMT_F;
+  extern const pmt_t PMT_NIL;
+  extern const pmt_t PMT_EOF;
 
   bool is_bool(pmt_t obj);
   bool is_true(pmt_t obj);
@@ -111,8 +109,6 @@ namespace pmt{
   bool is_real(pmt_t obj);
   pmt_t from_double(double x);
   double to_double(pmt_t x);
-  pmt_t from_float(double x);
-  double to_float(pmt_t x);
 
   bool is_complex(pmt_t obj);
   pmt_t make_rectangular(double re, double im);
@@ -223,7 +219,7 @@ namespace pmt{
   void c64vector_set(pmt_t v, size_t k, std::complex<double> x);
 
   %apply size_t & INOUT { size_t &len };
-  const void *uniform_vector_elements(pmt_t v, size_t &len);
+  const void *uniform_vector_elements(pmt_t v, size_t &len);  
 
   const std::vector<uint8_t>  u8vector_elements(pmt_t v);
   const std::vector<int8_t>   s8vector_elements(pmt_t v);
@@ -294,30 +290,7 @@ namespace pmt{
   bool serialize(pmt_t obj, std::streambuf &sink);
   pmt_t deserialize(std::streambuf &source);
   void dump_sizeof();
-
-  std::vector<uint8_t> _serialize_str_u8(pmt_t obj);
-  pmt_t _deserialize_str_u8(std::vector<uint8_t> py_str);
-
-  %rename(_serialize_str) serialize_str;
   std::string serialize_str(pmt_t obj);
-
-  %rename(_deserialize_str) deserialize_str;
   pmt_t deserialize_str(std::string str);
 
 } //namespace pmt
-
-%pythoncode %{
-  def serialize_str(pmt_obj):
-    import sys
-    if sys.version_info.major == 2:
-      return _serialize_str(pmt_obj)
-    import array
-    return array.array('B', _serialize_str_u8(pmt_obj)).tobytes()
-
-  def deserialize_str(pmt_str):
-    import sys
-    if sys.version_info.major == 2:
-      return _deserialize_str(pmt_str)
-    return _deserialize_str_u8(tuple(x for x in pmt_str))
-
-%}

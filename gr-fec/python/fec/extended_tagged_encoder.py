@@ -4,23 +4,29 @@
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 #
-
-from __future__ import absolute_import
-from __future__ import unicode_literals
-
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
+#
 
 from gnuradio import gr, blocks
 
-from . import fec_swig as fec
-
-from .bitflip import read_bitlist
-
+import fec_swig as fec
+from bitflip import read_bitlist
 
 class extended_tagged_encoder(gr.hier_block2):
-    def __init__(self, encoder_obj_list, puncpat=None, lentagname=None, mtu=1500):
+    def __init__(self, encoder_obj_list, puncpat=None, lentagname=None):
         gr.hier_block2.__init__(self, "extended_tagged_encoder",
                                 gr.io_signature(1, 1, gr.sizeof_char),
                                 gr.io_signature(1, 1, gr.sizeof_char))
@@ -60,7 +66,7 @@ class extended_tagged_encoder(gr.hier_block2):
             self.blocks.append(fec.tagged_encoder(encoder_obj,
                                                   gr.sizeof_char,
                                                   gr.sizeof_char,
-                                                  lentagname, mtu))
+                                                  lentagname))
 
         if self.puncpat != '11':
             self.blocks.append(fec.puncture_bb(len(puncpat), read_bitlist(puncpat), 0))

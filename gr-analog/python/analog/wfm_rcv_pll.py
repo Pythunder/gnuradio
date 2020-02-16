@@ -3,23 +3,32 @@
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 #
-
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import unicode_literals
-
-import math
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
+#
 
 from gnuradio import gr
 from gnuradio import blocks
 from gnuradio import filter
+from fm_emph import fm_deemph
+import math
 
-from . import analog_swig as analog
-from .fm_emph import fm_deemph
-
+try:
+    from gnuradio import analog
+except ImportError:
+    import analog_swig as analog
 
 class wfm_rcv_pll(gr.hier_block2):
     def __init__(self, demod_rate, audio_decimation):
@@ -33,9 +42,9 @@ class wfm_rcv_pll(gr.hier_block2):
             demod_rate: input sample rate of complex baseband input. (float)
             audio_decimation: how much to decimate demod_rate to get to audio. (integer)
         """
-        gr.hier_block2.__init__(self, "wfm_rcv_pll",
-                                gr.io_signature(1, 1, gr.sizeof_gr_complex), # Input signature
-                                gr.io_signature(2, 2, gr.sizeof_float))      # Output signature
+	gr.hier_block2.__init__(self, "wfm_rcv_pll",
+				gr.io_signature(1, 1, gr.sizeof_gr_complex), # Input signature
+				gr.io_signature(2, 2, gr.sizeof_float))      # Output signature
         bandwidth = 250e3
         audio_rate = demod_rate / audio_decimation
 
@@ -83,8 +92,8 @@ class wfm_rcv_pll(gr.hier_block2):
             stereo_dsbsc_filter_coeffs = \
                 filter.firdes.complex_band_pass(20.0,
                                                 demod_rate,
-                                                38000-15000 / 2,
-                                                38000+15000 / 2,
+                                                38000-15000/2,
+                                                38000+15000/2,
                                                 width_of_transition_band,
                                                 filter.firdes.WIN_HAMMING)
             #print "len stereo dsbsc filter = ",len(stereo_dsbsc_filter_coeffs)
@@ -94,7 +103,7 @@ class wfm_rcv_pll(gr.hier_block2):
             self.stereo_carrier_filter = \
                 filter.fir_filter_fcc(audio_decimation, stereo_carrier_filter_coeffs)
 
-            # carrier is twice the picked off carrier so arrange to do a complex multiply
+            # carrier is twice the picked off carrier so arrange to do a commplex multiply
 
             self.stereo_carrier_generator = blocks.multiply_cc();
 
@@ -111,12 +120,12 @@ class wfm_rcv_pll(gr.hier_block2):
             #print "stereo dsbsc filter ", stereo_dsbsc_filter_coeffs
             # construct overlap add filter system from coefficients for stereo carrier
 
-            self.rds_signal_filter = \
+	    self.rds_signal_filter = \
                 filter.fir_filter_fcc(audio_decimation, stereo_rds_filter_coeffs)
 
-            self.rds_carrier_generator = blocks.multiply_cc();
-            self.rds_signal_generator = blocks.multiply_cc();
-            self_rds_signal_processor = blocks.null_sink(gr.sizeof_gr_complex);
+	    self.rds_carrier_generator = blocks.multiply_cc();
+	    self.rds_signal_generator = blocks.multiply_cc();
+	    self_rds_signal_processor = blocks.null_sink(gr.sizeof_gr_complex);
 
             loop_bw = 2*math.pi/100.0
             max_freq = -2.0*math.pi*18990/audio_rate;
@@ -160,15 +169,15 @@ class wfm_rcv_pll(gr.hier_block2):
             #take the same real part of the DSBSC baseband signal and send it to negative side of a subtracter
             self.connect(self.LmR_real,(self.Make_Right,1))
 
-            # Make rds carrier by taking the squared pilot tone and multiplying by pilot tone
-            self.connect(self.stereo_basebander,(self.rds_carrier_generator,0))
+	    # Make rds carrier by taking the squared pilot tone and multiplying by pilot tone
+	    self.connect(self.stereo_basebander,(self.rds_carrier_generator,0))
             self.connect(self.stereo_carrier_pll_recovery,(self.rds_carrier_generator,1))
-            # take signal, filter off rds,  send into mixer 0 channel
-            self.connect(self.fm_demod,self.rds_signal_filter,(self.rds_signal_generator,0))
+	    # take signal, filter off rds,  send into mixer 0 channel
+	    self.connect(self.fm_demod,self.rds_signal_filter,(self.rds_signal_generator,0))
             # take rds_carrier_generator output and send into mixer 1 channel
-            self.connect(self.rds_carrier_generator,(self.rds_signal_generator,1))
-            # send basebanded rds signal and send into "processor" which for now is a null sink
-            self.connect(self.rds_signal_generator,self_rds_signal_processor)
+	    self.connect(self.rds_carrier_generator,(self.rds_signal_generator,1))
+	    # send basebanded rds signal and send into "processor" which for now is a null sink
+	    self.connect(self.rds_signal_generator,self_rds_signal_processor)
 
 
         if 1:

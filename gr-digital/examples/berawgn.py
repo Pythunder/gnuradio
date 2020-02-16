@@ -4,8 +4,20 @@
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
 #
 
 """
@@ -20,10 +32,6 @@ Of course, expect the maximum value for BER to be one order of
 magnitude below what you chose for N_BITS.
 """
 
-from __future__ import print_function
-from __future__ import division
-from __future__ import unicode_literals
-
 
 import math
 import numpy
@@ -35,13 +43,13 @@ import sys
 try:
     from scipy.special import erfc
 except ImportError:
-    print("Error: could not import scipy (http://www.scipy.org/)")
+    print "Error: could not import scipy (http://www.scipy.org/)"
     sys.exit(1)
 
 try:
-    from matplotlib import pyplot
+    import pylab
 except ImportError:
-    print("Error: could not from matplotlib import pyplot (http://matplotlib.sourceforge.net/)")
+    print "Error: could not import pylab (http://matplotlib.sourceforge.net/)"
     sys.exit(1)
 
 # Best to choose powers of 10
@@ -50,7 +58,7 @@ RAND_SEED = 42
 
 def berawgn(EbN0):
     """ Calculates theoretical bit error rate in AWGN (for BPSK and given Eb/N0) """
-    return 0.5 * erfc(math.sqrt(10**(float(EbN0) / 10)))
+    return 0.5 * erfc(math.sqrt(10**(float(EbN0)/10)))
 
 class BitErrors(gr.hier_block2):
     """ Two inputs: true and received bits. We compare them and
@@ -73,7 +81,7 @@ class BitErrors(gr.hier_block2):
                      blocks.unpack_k_bits_bb(bits_per_byte),
                      blocks.uchar_to_float(),
                      blocks.integrate_ff(intdump_decim),
-                     blocks.multiply_const_ff(1.0 / N_BITS),
+                     blocks.multiply_const_ff(1.0/N_BITS),
                      self)
         self.connect((self, 1), (comp, 1))
 
@@ -83,7 +91,7 @@ class BERAWGNSimu(gr.top_block):
         gr.top_block.__init__(self)
         self.const = digital.qpsk_constellation()
         # Source is N_BITS bits, non-repeated
-        data = list(map(int, numpy.random.randint(0, self.const.arity(), N_BITS / self.const.bits_per_symbol())))
+        data = map(int, numpy.random.randint(0, self.const.arity(), N_BITS/self.const.bits_per_symbol()))
         src   = blocks.vector_source_b(data, False)
         mod   = digital.chunks_to_symbols_bc((self.const.points()), 1)
         add   = blocks.add_vcc()
@@ -98,13 +106,13 @@ class BERAWGNSimu(gr.top_block):
         self.connect(src, (ber, 1))
 
     def EbN0_to_noise_voltage(self, EbN0):
-        """ Converts Eb/N0 to a complex noise voltage (assuming unit symbol power) """
-        return 1.0 / math.sqrt(self.const.bits_per_symbol( * 10**(float(EbN0) / 10)))
+        """ Converts Eb/N0 to a single-sided noise voltage (assuming unit symbol power) """
+        return 1.0 / math.sqrt(2.0 * self.const.bits_per_symbol() * 10**(float(EbN0)/10))
 
 
 def simulate_ber(EbN0):
     """ All the work's done here: create flow graph, run, read out BER """
-    print("Eb/N0 = %d dB" % EbN0)
+    print "Eb/N0 = %d dB" % EbN0
     fg = BERAWGNSimu(EbN0)
     fg.run()
     return numpy.sum(fg.sink.data())
@@ -112,12 +120,12 @@ def simulate_ber(EbN0):
 if __name__ == "__main__":
     EbN0_min = 0
     EbN0_max = 15
-    EbN0_range = list(range(EbN0_min, EbN0_max+1))
+    EbN0_range = range(EbN0_min, EbN0_max+1)
     ber_theory = [berawgn(x)      for x in EbN0_range]
-    print("Simulating...")
+    print "Simulating..."
     ber_simu   = [simulate_ber(x) for x in EbN0_range]
 
-    f = pyplot.figure()
+    f = pylab.figure()
     s = f.add_subplot(1,1,1)
     s.semilogy(EbN0_range, ber_theory, 'g-.', label="Theoretical")
     s.semilogy(EbN0_range, ber_simu, 'b-o', label="Simulated")
@@ -126,4 +134,5 @@ if __name__ == "__main__":
     s.set_ylabel('BER')
     s.legend()
     s.grid()
-    pyplot.show()
+    pylab.show()
+

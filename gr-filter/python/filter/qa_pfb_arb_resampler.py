@@ -4,24 +4,34 @@
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 #
-
-from __future__ import division
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
+#
 
 from gnuradio import gr, gr_unittest, filter, blocks
 import math
 
 def sig_source_c(samp_rate, freq, amp, N):
-    t = [float(x) / samp_rate for x in range(N)]
-    y = [math.cos(2.*math.pi*freq*x) + \
-                1j*math.sin(2.*math.pi*freq*x) for x in t]
+    t = map(lambda x: float(x)/samp_rate, xrange(N))
+    y = map(lambda x: math.cos(2.*math.pi*freq*x) + \
+                1j*math.sin(2.*math.pi*freq*x), t)
     return y
 
 def sig_source_f(samp_rate, freq, amp, N):
-    t = [float(x) / samp_rate for x in range(N)]
-    y = [math.sin(2.*math.pi*freq*x) for x in t]
+    t = map(lambda x: float(x)/samp_rate, xrange(N))
+    y = map(lambda x: math.sin(2.*math.pi*freq*x), t)
     return y
 
 class test_pfb_arb_resampler(gr_unittest.TestCase):
@@ -38,7 +48,7 @@ class test_pfb_arb_resampler(gr_unittest.TestCase):
         rrate = 2.3421  # resampling rate
 
         nfilts = 32
-        taps = filter.firdes.low_pass_2(nfilts, nfilts*fs, fs / 2, fs / 10,
+        taps = filter.firdes.low_pass_2(nfilts, nfilts*fs, fs/2, fs/10,
                                         attenuation_dB=80,
                                         window=filter.firdes.WIN_BLACKMAN_hARRIS)
 
@@ -59,10 +69,10 @@ class test_pfb_arb_resampler(gr_unittest.TestCase):
         phase = pfb.phase_offset(freq, fs)
 
         # Create a timeline offset by the filter's group delay
-        t = [float(x) / (fs*rrate) for x in range(-delay, L-delay)]
+        t = map(lambda x: float(x)/(fs*rrate), xrange(delay, L+delay))
 
         # Data of the sinusoid at frequency freq with the delay and phase offset.
-        expected_data = [math.sin(2.*math.pi*freq*x+phase) for x in t]
+        expected_data = map(lambda x: math.sin(2.*math.pi*freq*x+phase), t)
 
         dst_data = snk.data()
 
@@ -74,7 +84,7 @@ class test_pfb_arb_resampler(gr_unittest.TestCase):
         rrate = 2.4321   # resampling rate
 
         nfilts = 32
-        taps = filter.firdes.low_pass_2(nfilts, nfilts*fs, fs / 2, fs / 10,
+        taps = filter.firdes.low_pass_2(nfilts, nfilts*fs, fs/2, fs/10,
                                         attenuation_dB=80,
                                         window=filter.firdes.WIN_BLACKMAN_hARRIS)
 
@@ -95,11 +105,11 @@ class test_pfb_arb_resampler(gr_unittest.TestCase):
         phase = pfb.phase_offset(freq, fs)
 
         # Create a timeline offset by the filter's group delay
-        t = [float(x) / (fs*rrate) for x in range(-delay, L-delay)]
+        t = map(lambda x: float(x)/(fs*rrate), xrange(delay, L+delay))
 
         # Data of the sinusoid at frequency freq with the delay and phase offset.
-        expected_data = [math.cos(2.*math.pi*freq*x+phase) + \
-                                1j*math.sin(2.*math.pi*freq*x+phase) for x in t]
+        expected_data = map(lambda x: math.cos(2.*math.pi*freq*x+phase) + \
+                                1j*math.sin(2.*math.pi*freq*x+phase), t)
 
         dst_data = snk.data()
 
@@ -111,7 +121,7 @@ class test_pfb_arb_resampler(gr_unittest.TestCase):
         rrate = 0.75     # resampling rate
 
         nfilts = 32
-        taps = filter.firdes.low_pass_2(nfilts, nfilts*fs, fs / 4, fs / 10,
+        taps = filter.firdes.low_pass_2(nfilts, nfilts*fs, fs/4, fs/10,
                                         attenuation_dB=80,
                                         window=filter.firdes.WIN_BLACKMAN_hARRIS)
 
@@ -132,11 +142,11 @@ class test_pfb_arb_resampler(gr_unittest.TestCase):
         phase = pfb.phase_offset(freq, fs)
 
         # Create a timeline offset by the filter's group delay
-        t = [float(x) / (fs*rrate) for x in range(-delay, L-delay)]
+        t = map(lambda x: float(x)/(fs*rrate), xrange(delay, L+delay))
 
         # Data of the sinusoid at frequency freq with the delay and phase offset.
-        expected_data = [math.cos(2.*math.pi*freq*x+phase) + \
-                                1j*math.sin(2.*math.pi*freq*x+phase) for x in t]
+        expected_data = map(lambda x: math.cos(2.*math.pi*freq*x+phase) + \
+                                1j*math.sin(2.*math.pi*freq*x+phase), t)
 
         dst_data = snk.data()
 
@@ -148,7 +158,7 @@ class test_pfb_arb_resampler(gr_unittest.TestCase):
         rrate = 3.4321   # resampling rate
 
         nfilts = 32
-        taps = filter.firdes.complex_band_pass_2(nfilts, nfilts*fs, 50, 400, fs / 10,
+        taps = filter.firdes.complex_band_pass_2(nfilts, nfilts*fs, 50, 400, fs/10,
                                                  attenuation_dB=80,
                                                  window=filter.firdes.WIN_BLACKMAN_hARRIS)
 
@@ -169,11 +179,11 @@ class test_pfb_arb_resampler(gr_unittest.TestCase):
         phase = pfb.phase_offset(freq, fs)
 
         # Create a timeline offset by the filter's group delay
-        t = [float(x) / (fs*rrate) for x in range(-delay, L-delay)]
+        t = map(lambda x: float(x)/(fs*rrate), xrange(delay, L+delay))
 
         # Data of the sinusoid at frequency freq with the delay and phase offset.
-        expected_data = [math.cos(2.*math.pi*freq*x+phase) + \
-                                1j*math.sin(2.*math.pi*freq*x+phase) for x in t]
+        expected_data = map(lambda x: math.cos(2.*math.pi*freq*x+phase) + \
+                                1j*math.sin(2.*math.pi*freq*x+phase), t)
 
         dst_data = snk.data()
 
@@ -185,7 +195,7 @@ class test_pfb_arb_resampler(gr_unittest.TestCase):
         rrate = 0.715    # resampling rate
 
         nfilts = 32
-        taps = filter.firdes.complex_band_pass_2(nfilts, nfilts*fs, 50, 400, fs / 10,
+        taps = filter.firdes.complex_band_pass_2(nfilts, nfilts*fs, 50, 400, fs/10,
                                                  attenuation_dB=80,
                                                  window=filter.firdes.WIN_BLACKMAN_hARRIS)
 
@@ -206,11 +216,11 @@ class test_pfb_arb_resampler(gr_unittest.TestCase):
         phase = pfb.phase_offset(freq, fs)
 
         # Create a timeline offset by the filter's group delay
-        t = [float(x) / (fs*rrate) for x in range(-delay, L-delay)]
+        t = map(lambda x: float(x)/(fs*rrate), xrange(delay, L+delay))
 
         # Data of the sinusoid at frequency freq with the delay and phase offset.
-        expected_data = [math.cos(2.*math.pi*freq*x+phase) + \
-                                1j*math.sin(2.*math.pi*freq*x+phase) for x in t]
+        expected_data = map(lambda x: math.cos(2.*math.pi*freq*x+phase) + \
+                                1j*math.sin(2.*math.pi*freq*x+phase), t)
 
         dst_data = snk.data()
 

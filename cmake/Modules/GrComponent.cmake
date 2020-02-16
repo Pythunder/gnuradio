@@ -2,8 +2,20 @@
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
 
 if(DEFINED __INCLUDED_GR_COMPONENT_CMAKE)
     return()
@@ -34,8 +46,9 @@ function(GR_REGISTER_COMPONENT name var)
         message(STATUS "  Dependency ${dep} = ${${dep}}")
     endforeach(dep)
 
-    #if the user set the var to force on, we note this
-    if("${${var}}" STREQUAL "ON")
+    #if the user set the var to force, we note this
+    if("${${var}}" STREQUAL "FORCE")
+        set(${var} ON)
         set(var_force TRUE)
     else()
         set(var_force FALSE)
@@ -77,12 +90,6 @@ function(GR_REGISTER_COMPONENT name var)
     set(_gr_enabled_components ${_gr_enabled_components} CACHE INTERNAL "" FORCE)
     set(_gr_disabled_components ${_gr_disabled_components} CACHE INTERNAL "" FORCE)
 endfunction(GR_REGISTER_COMPONENT)
-
-
-function(GR_APPEND_SUBCOMPONENT name)
-  list(APPEND _gr_enabled_components "* ${name}")
-  set(_gr_enabled_components ${_gr_enabled_components} CACHE INTERNAL "" FORCE)
-endfunction(GR_APPEND_SUBCOMPONENT name)
 
 ########################################################################
 # Print the registered component summary

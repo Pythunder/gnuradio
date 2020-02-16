@@ -4,10 +4,21 @@
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 #
-
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
+#
 
 from gnuradio import gr, gr_unittest, blocks
 
@@ -20,7 +31,7 @@ class test_boolean_operators (gr_unittest.TestCase):
         self.tb = None
 
     def help_ss (self, src_data, exp_data, op):
-        for s in zip (list(range(len (src_data))), src_data):
+        for s in zip (range (len (src_data)), src_data):
             src = blocks.vector_source_s (s[1])
             self.tb.connect (src, (op, s[0]))
         dst = blocks.vector_sink_s ()
@@ -30,7 +41,7 @@ class test_boolean_operators (gr_unittest.TestCase):
         self.assertEqual (exp_data, result_data)
 
     def help_bb (self, src_data, exp_data, op):
-        for s in zip (list(range(len (src_data))), src_data):
+        for s in zip (range (len (src_data)), src_data):
             src = blocks.vector_source_b (s[1])
             self.tb.connect (src, (op, s[0]))
         dst = blocks.vector_sink_b ()
@@ -40,7 +51,7 @@ class test_boolean_operators (gr_unittest.TestCase):
         self.assertEqual (exp_data, result_data)
 
     def help_ii (self, src_data, exp_data, op):
-        for s in zip (list(range(len (src_data))), src_data):
+        for s in zip (range (len (src_data)), src_data):
             src = blocks.vector_source_i (s[1])
             self.tb.connect (src, (op, s[0]))
         dst = blocks.vector_sink_i ()

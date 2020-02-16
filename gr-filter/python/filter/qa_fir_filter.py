@@ -4,10 +4,20 @@
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 #
-
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+#
 
 from gnuradio import gr, gr_unittest, filter, blocks
 
@@ -90,7 +100,7 @@ class test_filter(gr_unittest.TestCase):
         taps = 20*[0.5+1j, 0.5+1j]
         src_data = 40*[1+1j, 2+2j, 3+3j, 4+4j]
         expected_data = fir_filter(src_data, taps, decim)
-
+        
         src = blocks.vector_source_c(src_data)
         op  = filter.fir_filter_ccc(decim, taps)
         dst = blocks.vector_sink_c()
@@ -105,7 +115,7 @@ class test_filter(gr_unittest.TestCase):
         taps = filter.firdes.low_pass(1, 1, 0.1, 0.01)
         src_data = 10*[1+1j, 2+2j, 3+3j, 4+4j]
         expected_data = fir_filter(src_data, taps, decim)
-
+        
         src = blocks.vector_source_c(src_data)
         op  = filter.fir_filter_ccc(decim, taps)
         dst = blocks.vector_sink_c()

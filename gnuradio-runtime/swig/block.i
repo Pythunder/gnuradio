@@ -4,8 +4,20 @@
  *
  * This file is part of GNU Radio
  *
- * SPDX-License-Identifier: GPL-3.0-or-later
+ * GNU Radio is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3, or (at your option)
+ * any later version.
  *
+ * GNU Radio is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with GNU Radio; see the file COPYING.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street,
+ * Boston, MA 02110-1301, USA.
  */
 
 %include <basic_block.i>
@@ -36,20 +48,14 @@ class gr::block : public gr::basic_block
   void declare_sample_delay(unsigned int delay);
   unsigned sample_delay(int which) const;
 
-  void set_output_multiple(int multiple);
   int  output_multiple () const;
   double relative_rate () const;
-  uint64_t relative_rate_i () const;
-  uint64_t relative_rate_d () const;
 
   bool start();
   bool stop();
 
   uint64_t nitems_read(unsigned int which_input);
   uint64_t nitems_written(unsigned int which_output);
-
-  void set_log_level(std::string level);
-  std::string log_level();
 
   // Methods to manage the block's max_noutput_items size.
   int max_noutput_items();
@@ -90,7 +96,6 @@ class gr::block : public gr::basic_block
   float pc_work_time_avg();
   float pc_work_time_var();
   float pc_work_time_total();
-  float pc_throughput_avg();
 
   // Methods to manage processor affinity.
   void set_processor_affinity(const std::vector<int> &mask);

@@ -4,11 +4,21 @@
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 #
-
-from __future__ import division
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
+#
 
 import numpy
 from gnuradio import gr, gr_unittest, wavelet, analog, blocks
@@ -69,14 +79,14 @@ class test_classify(gr_unittest.TestCase):
 
     def test_002_(self):
         src_data = numpy.array([-1.0,
-                                -1.0 / 2.0,
-                                -1.0 / 3.0,
-                                -1.0 / 4.0,
-                                -1.0 / 5.0])
+                                -1.0/2.0,
+                                -1.0/3.0,
+                                -1.0/4.0,
+                                -1.0/5.0])
         trg_data = copy.deepcopy(src_data)
 
         src = blocks.vector_source_f(src_data, False, len(src_data))
-        st = blocks.stretch_ff(-1.0 / 5.0, len(src_data))
+        st = blocks.stretch_ff(-1.0/5.0, len(src_data))
         dst = blocks.vector_sink_f(len(src_data))
         self.tb.connect(src, st)
         self.tb.connect(st, dst)
@@ -145,11 +155,11 @@ class test_classify(gr_unittest.TestCase):
         dwav = numpy.array(src_data)
         wvps = numpy.zeros(3)
         # wavelet power spectrum
-        scl = 1.0 / sqr(dwav[0])
+        scl = 1.0/sqr(dwav[0])
         k = 1
         for e in range(len(wvps)):
-            wvps[e] = scl*sqr(dwav[k:k+(0o1<<e)]).sum()
-            k += 0o1<<e
+            wvps[e] = scl*sqr(dwav[k:k+(01<<e)]).sum()
+            k += 01<<e
 
         src = blocks.vector_source_f(src_data, False, len(src_data))
         kon = wavelet.wvps_ff(len(src_data))

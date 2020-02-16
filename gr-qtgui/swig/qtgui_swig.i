@@ -4,8 +4,20 @@
  *
  * This file is part of GNU Radio
  *
- * SPDX-License-Identifier: GPL-3.0-or-later
+ * GNU Radio is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3, or (at your option)
+ * any later version.
  *
+ * GNU Radio is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with GNU Radio; see the file COPYING.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street,
+ * Boston, MA 02110-1301, USA.
  */
 
 #define QTGUI_API
@@ -25,18 +37,6 @@ namespace gr {
       NUM_GRAPH_VERT,
     };
 
-    enum data_type_t {
-      INT = 0,
-      FLOAT,
-      DOUBLE,
-      COMPLEX,
-      STRING,
-      INT_VEC,
-      FLOAT_VEC,
-      DOUBLE_VEC,
-      COMPLEX_VEC,
-    };
-
   } /* namespace qtgui */
 } /* namespace gr */
 
@@ -46,9 +46,7 @@ enum{
   INTENSITY_COLOR_MAP_TYPE_WHITE_HOT = 1,
   INTENSITY_COLOR_MAP_TYPE_BLACK_HOT = 2,
   INTENSITY_COLOR_MAP_TYPE_INCANDESCENT = 3,
-  INTENSITY_COLOR_MAP_TYPE_USER_DEFINED = 4,
-  INTENSITY_COLOR_MAP_TYPE_SUNSET = 5,
-  INTENSITY_COLOR_MAP_TYPE_COOL = 6,
+  INTENSITY_COLOR_MAP_TYPE_USER_DEFINED = 4
 };
 
 %include "gnuradio/qtgui/trigger_mode.h"
@@ -74,8 +72,6 @@ enum{
 #include "gnuradio/qtgui/histogram_sink_f.h"
 #include "gnuradio/qtgui/number_sink.h"
 #include "gnuradio/qtgui/ber_sink_b.h"
-#include "gnuradio/qtgui/vector_sink_f.h"
-#include "gnuradio/qtgui/edit_box_msg.h"
 %}
 
 %include "gnuradio/qtgui/sink_c.h"
@@ -92,8 +88,6 @@ enum{
 %include "gnuradio/qtgui/histogram_sink_f.h"
 %include "gnuradio/qtgui/number_sink.h"
 %include "gnuradio/qtgui/ber_sink_b.h"
-%include "gnuradio/qtgui/vector_sink_f.h"
-%include "gnuradio/qtgui/edit_box_msg.h"
 
 GR_SWIG_BLOCK_MAGIC2(qtgui, sink_c);
 GR_SWIG_BLOCK_MAGIC2(qtgui, sink_f);
@@ -109,5 +103,3 @@ GR_SWIG_BLOCK_MAGIC2(qtgui, waterfall_sink_f);
 GR_SWIG_BLOCK_MAGIC2(qtgui, histogram_sink_f);
 GR_SWIG_BLOCK_MAGIC2(qtgui, number_sink);
 GR_SWIG_BLOCK_MAGIC2(qtgui, ber_sink_b);
-GR_SWIG_BLOCK_MAGIC2(qtgui, vector_sink_f);
-GR_SWIG_BLOCK_MAGIC2(qtgui, edit_box_msg);

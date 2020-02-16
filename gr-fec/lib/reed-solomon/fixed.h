@@ -9,13 +9,12 @@
 
 #include <gnuradio/fec/api.h>
 
-static inline int mod255(int x)
-{
-    while (x >= 255) {
-        x -= 255;
-        x = (x >> 8) + (x & 255);
-    }
-    return x;
+static inline int mod255(int x){
+  while (x >= 255) {
+    x -= 255;
+    x = (x >> 8) + (x & 255);
+  }
+  return x;
 }
 #define MODNN(x) mod255(x)
 
@@ -37,5 +36,5 @@ extern unsigned char CCSDS_poly[];
 #define ENCODE_RS encode_rs_8
 #define DECODE_RS decode_rs_8
 
-FEC_API void ENCODE_RS(DTYPE* data, DTYPE* parity);
-FEC_API int DECODE_RS(DTYPE* data, int* eras_pos, int no_eras);
+FEC_API void ENCODE_RS(DTYPE *data,DTYPE *parity);
+FEC_API int DECODE_RS(DTYPE *data, int *eras_pos, int no_eras);

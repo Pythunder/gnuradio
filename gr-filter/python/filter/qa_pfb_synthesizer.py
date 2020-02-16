@@ -4,20 +4,30 @@
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 #
-
-from __future__ import division
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
+#
 
 from gnuradio import gr, gr_unittest, filter, blocks
 
 import math
 
 def sig_source_c(samp_rate, freq, amp, N):
-    t = [float(x) / samp_rate for x in range(N)]
-    y = [math.cos(2.*math.pi*freq*x) + \
-                1j*math.sin(2.*math.pi*freq*x) for x in t]
+    t = map(lambda x: float(x)/samp_rate, xrange(N))
+    y = map(lambda x: math.cos(2.*math.pi*freq*x) + \
+                1j*math.sin(2.*math.pi*freq*x), t)
     return y
 
 class test_pfb_synthesizer(gr_unittest.TestCase):
@@ -34,20 +44,20 @@ class test_pfb_synthesizer(gr_unittest.TestCase):
         fs = 1000        # baseband sampling rate
         ofs = M*fs       # input samp rate to decimator
 
-        taps = filter.firdes.low_pass_2(M, ofs, fs / 2, fs / 10,
+        taps = filter.firdes.low_pass_2(M, ofs, fs/2, fs/10,
                                         attenuation_dB=80,
                                         window=filter.firdes.WIN_BLACKMAN_hARRIS)
 
         signals = list()
         freqs = [0, 100, 200, -200, -100]
-        for i in range(len(freqs)):
+        for i in xrange(len(freqs)):
             data = sig_source_c(fs, freqs[i], 1, N)
             signals.append(blocks.vector_source_c(data))
 
         pfb = filter.pfb_synthesizer_ccf(M, taps)
         snk = blocks.vector_sink_c()
 
-        for i in range(M):
+        for i in xrange(M):
             self.tb.connect(signals[i], (pfb,i))
 
         self.tb.connect(pfb, snk)
@@ -63,13 +73,13 @@ class test_pfb_synthesizer(gr_unittest.TestCase):
 
         Ntest = 1000
         L = len(snk.data())
-        t = [float(x) / ofs for x in range(L)]
+        t = map(lambda x: float(x)/ofs, xrange(L))
 
         # Create known data as sum of complex sinusoids at freqs
         # of the output channels.
         freqs = [-2200, -1100, 0, 1100, 2200]
         expected_data = len(t)*[0,]
-        for i in range(len(t)):
+        for i in xrange(len(t)):
             expected_data[i] = math.cos(2.*math.pi*freqs[0]*t[i] + p3) + \
                             1j*math.sin(2.*math.pi*freqs[0]*t[i] + p3) + \
                                math.cos(2.*math.pi*freqs[1]*t[i] + p4) + \

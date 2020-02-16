@@ -4,22 +4,32 @@
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 #
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
+#
+
+from gnuradio import gr, gr_unittest, blocks
+
+import random
+import struct
 
 """
 Note: There has been an issue with this block in the past, see Issue
 #199. This test is being enabled only on the 'next' branch for version
 v3.7 for now. TWR
 """
-
-from __future__ import print_function
-
-import struct
-
-from gnuradio import gr, gr_unittest, blocks
-
 
 class counter(gr.feval_dd):
     def __init__(self, step_size=1):
@@ -47,8 +57,8 @@ class counter3(gr.feval_dd):
             t = self.count
             self.count = self.count + self.step_size
             self.f(self.count)
-        except Exception as e:
-            print("Exception: ", e)
+        except Exception, e:
+            print "Exception: ", e
         return t
 
 def foobar3(new_t):
@@ -69,8 +79,8 @@ class counter4(gr.feval_dd):
             t = self.count
             self.count = self.count + self.step_size
             self.obj_instance.foobar4(self.count)
-        except Exception as e:
-            print("Exception: ", e)
+        except Exception, e:
+            print "Exception: ", e
         return t
 
 
@@ -79,8 +89,7 @@ class parse_msg(object):
         self.center_freq = msg.arg1()
         self.vlen = int(msg.arg2())
         assert(msg.length() == self.vlen * gr.sizeof_float)
-        self.data = struct.unpack(b'%df' % self.vlen, msg.to_string())
-
+        self.data = struct.unpack('%df' % (self.vlen,), msg.to_string())
 
 class test_bin_statistics(gr_unittest.TestCase):
 

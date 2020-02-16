@@ -1,16 +1,26 @@
 #!/usr/bin/env python
 #
 # Copyright 2011,2013 Free Software Foundation, Inc.
-#
+# 
 # This file is part of GNU Radio
-#
-# SPDX-License-Identifier: GPL-3.0-or-later
-#
-#
+# 
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
+# 
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
+# 
 
-from __future__ import division
-
-import random, math
+import random
 from cmath import exp, pi, log, sqrt
 
 from gnuradio import gr, gr_unittest, digital, blocks
@@ -25,12 +35,12 @@ tested_mod_codes = (mod_codes.NO_CODE, mod_codes.GRAY_CODE)
 # Second item is a dictionary of arguments for function with lists of
 # possible values.
 # Third item is whether differential encoding should be tested.
-# Fourth item is the name of the argument to constructor that specifies
+# Fourth item is the name of the argument to constructor that specifices
 # whether differential encoding is used.
 
 def twod_constell():
     """
-
+    
     """
     points = ((1+0j), (0+1j),
               (-1+0j), (0-1j))
@@ -41,7 +51,7 @@ def twod_constell():
 def threed_constell():
     oned_points = ((1+0j), (0+1j), (-1+0j), (0-1j))
     points = []
-    r4 = list(range(0, 4))
+    r4 = range(0, 4)
     for ia in r4:
         for ib in r4:
             for ic in r4:
@@ -66,12 +76,12 @@ easy_constellation_info = (
      False, None),
     (qam.qam_constellation,
      {'constellation_points': (4,),
-      'mod_code': tested_mod_codes,
+      'mod_code': tested_mod_codes, 
       'large_ampls_to_corners': [False],},
      True, None),
     (qam.qam_constellation,
      {'constellation_points': (4, 16, 64),
-      'mod_code': tested_mod_codes,
+      'mod_code': tested_mod_codes, 
       'differential': (False,)},
      False, None),
     (digital.constellation_bpsk, {}, True, None),
@@ -91,7 +101,7 @@ medium_constellation_info = (
      True, None),
     (qam.qam_constellation,
      {'constellation_points': (16 ,),
-      'mod_code': tested_mod_codes,
+      'mod_code': tested_mod_codes, 
       'large_ampls_to_corners': [False, True],},
      True, None),
     (qamlike.qam32_holeinside_constellation,
@@ -103,19 +113,10 @@ medium_constellation_info = (
 difficult_constellation_info = (
     (qam.qam_constellation,
      {'constellation_points': (64,),
-      'mod_code': tested_mod_codes,
+      'mod_code': tested_mod_codes, 
       'large_ampls_to_corners': [False, True],},
-     True, None),
+     True, None),    
 )
-
-def slicer(x):
-    ret = []
-    for xi in x:
-        if(xi < 0):
-            ret.append(0.0)
-    else:
-        ret.append(1.0)
-    return ret
 
 def tested_constellations(easy=True, medium=True, difficult=True):
     """
@@ -133,7 +134,7 @@ def tested_constellations(easy=True, medium=True, difficult=True):
             diff_poss = (True, False)
         else:
             diff_poss = (False,)
-        poss_args = [[argname, argvalues, 0] for argname, argvalues in list(poss_args.items())]
+        poss_args = [[argname, argvalues, 0] for argname, argvalues in poss_args.items()]
         for current_diff in diff_poss:
             # Add an index into args to keep track of current position in argvalues
             while True:
@@ -152,14 +153,13 @@ def tested_constellations(easy=True, medium=True, difficult=True):
                         this_poss_arg[2] = 0
                 if sum([argindex for argname, argvalues, argindex in poss_args]) == 0:
                     break
-
+            
 
 class test_constellation(gr_unittest.TestCase):
 
     src_length = 256
 
     def setUp(self):
-        random.seed(0)
         # Generate a list of random bits.
         self.src_data = tuple([random.randint(0,1) for i in range(0, self.src_length)])
 
@@ -170,7 +170,7 @@ class test_constellation(gr_unittest.TestCase):
         for constellation, differential in tested_constellations():
             if differential:
                 rs = constellation.rotational_symmetry()
-                rotations = [exp(i*2*pi*(0+1j)/rs) for i in range(0, rs)]
+                rotations = [exp(i*2*pi*(0+1j)/rs) for i in range(0, rs)] 
             else:
                 rotations = [None]
             for rotation in rotations:
@@ -202,7 +202,7 @@ class test_constellation(gr_unittest.TestCase):
         table = digital.soft_dec_table_generator(digital.sd_psk_4_0, prec, Es)
         c.set_soft_dec_lut(table, prec)
 
-        x = sqrt(2.0) / 2.0
+        x = sqrt(2.0)/2.0
         step = (x.real+x.real) / (2**prec - 1)
         samples = [ -x-x*1j, -x+x*1j,
                      x+x*1j,  x-x*1j,
@@ -216,17 +216,17 @@ class test_constellation(gr_unittest.TestCase):
         y_cpp_raw_calc = []
         y_cpp_table = []
         for sample in samples:
-            y_python_raw_calc += slicer(digital.calc_soft_dec(sample, constel, code))
-            y_python_gen_calc += slicer(digital.sd_psk_4_0(sample, Es))
-            y_python_table += slicer(digital.calc_soft_dec_from_table(sample, table, prec, Es))
+            y_python_raw_calc += digital.calc_soft_dec(sample, constel, code)
+            y_python_gen_calc += digital.sd_psk_4_0(sample, Es)
+            y_python_table += digital.calc_soft_dec_from_table(sample, table, prec, Es)
 
             y_cpp_raw_calc += c.calc_soft_dec(sample)
             y_cpp_table += c.soft_decision_maker(sample)
 
-        self.assertFloatTuplesAlmostEqual(y_python_raw_calc, y_python_gen_calc, 0)
-        self.assertFloatTuplesAlmostEqual(y_python_gen_calc, y_python_table, 0)
-        self.assertFloatTuplesAlmostEqual(y_cpp_raw_calc, y_cpp_table, 0)
-
+        self.assertFloatTuplesAlmostEqual(y_python_raw_calc, y_python_gen_calc, 4)
+        self.assertFloatTuplesAlmostEqual(y_python_raw_calc, y_python_table, 2)
+        self.assertFloatTuplesAlmostEqual(y_cpp_raw_calc, y_cpp_table, 4)
+        
     def test_soft_qpsk_calc(self):
         prec = 8
         constel, code = digital.psk_4_0()
@@ -244,7 +244,7 @@ class test_constellation(gr_unittest.TestCase):
         table = digital.soft_dec_table(constel, code, prec)
         c.gen_soft_dec_lut(prec)
 
-        x = sqrt(2.0) / 2.0
+        x = sqrt(2.0)/2.0
         step = (x.real+x.real) / (2**prec - 1)
         samples = [ -x-x*1j, -x+x*1j,
                      x+x*1j,  x-x*1j,
@@ -257,54 +257,14 @@ class test_constellation(gr_unittest.TestCase):
         y_cpp_raw_calc = []
         y_cpp_table = []
         for sample in samples:
-            y_python_raw_calc += slicer(digital.calc_soft_dec(sample, constel, code))
-            y_python_table += slicer(digital.calc_soft_dec_from_table(sample, table, prec, Es))
+            y_python_raw_calc += digital.calc_soft_dec(sample, constel, code)
+            y_python_table += digital.calc_soft_dec_from_table(sample, table, prec, Es)
 
-            y_cpp_raw_calc += slicer(c.calc_soft_dec(sample))
-            y_cpp_table += slicer(c.soft_decision_maker(sample))
+            y_cpp_raw_calc += c.calc_soft_dec(sample)
+            y_cpp_table += c.soft_decision_maker(sample)
 
-        self.assertEqual(y_python_raw_calc, y_python_table)
-        self.assertEqual(y_cpp_raw_calc, y_cpp_table)
-
-
-    def test_soft_qam16_calc(self):
-        prec = 8
-        constel, code = digital.qam_16_0()
-
-        rot_sym = 1
-        side = 2
-        width = 2
-        c = digital.constellation_rect(constel, code, rot_sym,
-                                       side, side, width, width)
-
-        # Get max energy/symbol in constellation
-        constel = c.points()
-        Es = max([abs(constel_i) for constel_i in constel])
-
-        table = digital.soft_dec_table(constel, code, prec)
-        c.gen_soft_dec_lut(prec)
-
-        x = sqrt(2.0) / 2.0
-        step = (x.real+x.real) / (2**prec - 1)
-        samples = [ -x-x*1j, -x+x*1j,
-                     x+x*1j,  x-x*1j,
-                   (-x+128*step)+(-x+128*step)*1j,
-                   (-x+64*step) +(-x+64*step)*1j,  (-x+64*step) +(-x+192*step)*1j,
-                   (-x+192*step)+(-x+192*step)*1j, (-x+192*step)+(-x+64*step)*1j,]
-
-        y_python_raw_calc = []
-        y_python_table = []
-        y_cpp_raw_calc = []
-        y_cpp_table = []
-        for sample in samples:
-            y_python_raw_calc += slicer(digital.calc_soft_dec(sample, constel, code))
-            y_python_table += slicer(digital.calc_soft_dec_from_table(sample, table, prec, Es))
-
-            y_cpp_raw_calc += slicer(c.calc_soft_dec(sample))
-            y_cpp_table += slicer(c.soft_decision_maker(sample))
-
-        self.assertFloatTuplesAlmostEqual(y_python_raw_calc, y_python_table, 0)
-        self.assertFloatTuplesAlmostEqual(y_cpp_raw_calc, y_cpp_table, 0)
+        self.assertFloatTuplesAlmostEqual(y_python_raw_calc, y_python_table, 4)
+        self.assertFloatTuplesAlmostEqual(y_cpp_raw_calc, y_cpp_table, 4)
 
 class mod_demod(gr.hier_block2):
     def __init__(self, constellation, differential, rotation):
@@ -313,9 +273,9 @@ class mod_demod(gr.hier_block2):
             # that they can work with shorts and ints as well as chars.
             raise ValueError("Constellation cannot contain more than 256 points.")
 
-        gr.hier_block2.__init__(self, "mod_demod",
-                                gr.io_signature(1, 1, gr.sizeof_char),       # Input signature
-                                gr.io_signature(1, 1, gr.sizeof_char))       # Output signature
+	gr.hier_block2.__init__(self, "mod_demod",
+				gr.io_signature(1, 1, gr.sizeof_char),       # Input signature
+				gr.io_signature(1, 1, gr.sizeof_char))       # Output signature
 
         arity = constellation.arity()
 
@@ -357,7 +317,7 @@ class mod_demod(gr.hier_block2):
         if self.constellation.apply_pre_diff_code():
             self.blocks.append(digital.map_bb(
                 mod_codes.invert_code(self.constellation.pre_diff_code())))
-        # unpack the k bit vector into a stream of bits
+        # unpack the k bit vector into a stream of bits            
         self.blocks.append(blocks.unpack_k_bits_bb(
                 self.constellation.bits_per_symbol()))
         # connect to block output
@@ -366,6 +326,6 @@ class mod_demod(gr.hier_block2):
         self.blocks.append(weakref.proxy(self))
 
         self.connect(*self.blocks)
-
+        
 if __name__ == '__main__':
     gr_unittest.run(test_constellation, "test_constellation.xml")

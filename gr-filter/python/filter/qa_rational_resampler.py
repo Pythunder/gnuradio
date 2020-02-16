@@ -4,12 +4,21 @@
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 #
-
-from __future__ import print_function
-from __future__ import division
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
+#
 
 from gnuradio import gr, gr_unittest, filter, blocks
 import math
@@ -19,7 +28,7 @@ import sys
 
 def random_floats(n):
     r = []
-    for x in range(n):
+    for x in xrange(n):
        # r.append(float(random.randint(-32768, 32768)))
         r.append(float(random.random()))
     return tuple(r)
@@ -63,10 +72,10 @@ def reference_interp_dec_filter(src_data, interp, decim, taps):
 class test_rational_resampler (gr_unittest.TestCase):
 
     def setUp(self):
-        random.seed(0)
+	random.seed(0)
 
     def tearDown(self):
-        pass
+	pass
 
 
     def test_000_1_to_1(self):
@@ -75,7 +84,7 @@ class test_rational_resampler (gr_unittest.TestCase):
         xr = (1186, -112, 339, -460, -167, 582)
         expected_result = tuple([float(x) for x in xr])
 
-        tb = gr.top_block()
+	tb = gr.top_block()
         src = blocks.vector_source_f(src_data)
         op = filter.rational_resampler_base_fff(1, 1, taps)
         dst = blocks.vector_sink_f()
@@ -98,7 +107,7 @@ class test_rational_resampler (gr_unittest.TestCase):
               1700.0,17000.0,170000.0, 0.0)
         expected_result = tuple([float(x) for x in xr])
 
-        tb = gr.top_block()
+	tb = gr.top_block()
         src = blocks.vector_source_f(src_data)
         op = filter.rational_resampler_base_fff(interpolation, 1, taps)
         dst = blocks.vector_sink_f()
@@ -115,7 +124,7 @@ class test_rational_resampler (gr_unittest.TestCase):
 
         expected_result = reference_interp_filter(src_data, interpolation, taps)
 
-        tb = gr.top_block()
+	tb = gr.top_block()
         src = blocks.vector_source_f(src_data)
         op = filter.rational_resampler_base_fff(interpolation, 1, taps)
         dst = blocks.vector_sink_f()
@@ -135,7 +144,7 @@ class test_rational_resampler (gr_unittest.TestCase):
 
         expected_result = reference_dec_filter(src_data, decimation, taps)
 
-        tb = gr.top_block()
+	tb = gr.top_block()
         src = blocks.vector_source_f(src_data)
         op = filter.rational_resampler_base_fff(1, decimation, taps)
         dst = blocks.vector_sink_f()
@@ -146,8 +155,8 @@ class test_rational_resampler (gr_unittest.TestCase):
 
         N = 10
         offset = 10#len(taps)-1
-        print(expected_result[100+offset:100+offset+N])
-        print(result_data[100:100+N])
+        print expected_result[100+offset:100+offset+N]
+        print result_data[100:100+N]
         #self.assertEqual(expected_result[offset:offset+N], result_data[0:N])
 
     # FIXME disabled.  Triggers hang on SuSE 10.0
@@ -158,9 +167,9 @@ class test_rational_resampler (gr_unittest.TestCase):
 
         random.seed(0)    # we want reproducibility
 
-        for ntaps in range(1, MAX_TAPS + 1):
-            for decim in range(1, MAX_DECIM+1):
-                for ilen in range(ntaps + decim, ntaps + OUTPUT_LEN*decim):
+        for ntaps in xrange(1, MAX_TAPS + 1):
+            for decim in xrange(1, MAX_DECIM+1):
+                for ilen in xrange(ntaps + decim, ntaps + OUTPUT_LEN*decim):
                     src_data = random_floats(ilen)
                     taps = random_floats(ntaps)
                     expected_result = reference_dec_filter(src_data, decim, taps)
@@ -192,9 +201,9 @@ class test_rational_resampler (gr_unittest.TestCase):
 
         random.seed(0)    # we want reproducibility
 
-        for ntaps in range(1, MAX_TAPS + 1):
-            for interp in range(1, MAX_INTERP+1):
-                for ilen in range(ntaps, ntaps + INPUT_LEN):
+        for ntaps in xrange(1, MAX_TAPS + 1):
+            for interp in xrange(1, MAX_INTERP+1):
+                for ilen in xrange(ntaps, ntaps + INPUT_LEN):
                     src_data = random_floats(ilen)
                     taps = random_floats(ntaps)
                     expected_result = reference_interp_filter(src_data, interp, taps)
@@ -227,7 +236,7 @@ class test_rational_resampler (gr_unittest.TestCase):
 
         expected_result = reference_interp_dec_filter(src_data, interp, decimation, taps)
 
-        tb = gr.top_block()
+	tb = gr.top_block()
         src = blocks.vector_source_f(src_data)
         op = filter.rational_resampler_base_fff(interp, decimation, taps)
         dst = blocks.vector_sink_f()
@@ -237,10 +246,11 @@ class test_rational_resampler (gr_unittest.TestCase):
         result_data = dst.data()
 
         N = 1000
-        offset = len(taps) // 2
+        offset = len(taps)/2
         self.assertFloatTuplesAlmostEqual(expected_result[offset:offset+N], result_data[0:N], 5)
 
 
 if __name__ == '__main__':
     # FIXME: Disabled, see ticket:210
     gr_unittest.run(test_rational_resampler, "test_rational_resampler.xml")
+

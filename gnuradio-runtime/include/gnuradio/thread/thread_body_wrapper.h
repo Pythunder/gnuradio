@@ -4,8 +4,19 @@
  *
  * This file is part of GNU Radio
  *
- * SPDX-License-Identifier: GPL-3.0-or-later
+ * GNU Radio is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3, or (at your option)
+ * any later version.
  *
+ * GNU Radio is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #ifndef INCLUDED_THREAD_BODY_WRAPPER_H
@@ -17,51 +28,45 @@
 #include <iostream>
 
 namespace gr {
-namespace thread {
+  namespace thread {
 
-GR_RUNTIME_API void mask_signals();
+  GR_RUNTIME_API void mask_signals();
 
-template <class F>
-class thread_body_wrapper
-{
-private:
-    F d_f;
-    std::string d_name;
-    bool d_catch_exceptions;
-
-public:
-    explicit thread_body_wrapper(F f,
-                                 const std::string& name = "",
-                                 bool catch_exceptions = true)
-        : d_f(f), d_name(name), d_catch_exceptions(catch_exceptions)
+    template <class F>
+    class thread_body_wrapper
     {
-    }
+    private:
+      F d_f;
+      std::string d_name;
 
-    void operator()()
-    {
+    public:
+      explicit thread_body_wrapper(F f, const std::string &name="")
+        : d_f(f), d_name(name) {}
+
+      void operator()()
+      {
         mask_signals();
 
-        if (d_catch_exceptions) {
-            try {
-                d_f();
-            } catch (boost::thread_interrupted const&) {
-            } catch (std::exception const& e) {
-                std::cerr << "thread[" << d_name << "]: " << e.what() << std::endl;
-            } catch (...) {
-                std::cerr << "thread[" << d_name << "]: "
-                          << "caught unrecognized exception\n";
-            }
-
-        } else {
-            try {
-                d_f();
-            } catch (boost::thread_interrupted const&) {
-            }
+        try {
+          d_f();
         }
-    }
-};
+        catch(boost::thread_interrupted const &)
+          {
+          }
+        catch(std::exception const &e)
+          {
+            std::cerr << "thread[" << d_name << "]: "
+                      << e.what() << std::endl;
+          }
+        catch(...)
+          {
+            std::cerr << "thread[" << d_name << "]: "
+                      << "caught unrecognized exception\n";
+          }
+      }
+    };
 
-} /* namespace thread */
+  } /* namespace thread */
 } /* namespace gr */
 
 #endif /* INCLUDED_THREAD_BODY_WRAPPER_H */

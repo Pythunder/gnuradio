@@ -4,10 +4,21 @@
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 #
-
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
+#
 
 from gnuradio import gr, gr_unittest, blocks
 
@@ -16,7 +27,6 @@ import random
 class test_packing(gr_unittest.TestCase):
 
     def setUp(self):
-        random.seed(0)
         self.tb = gr.top_block ()
 
     def tearDown(self):
@@ -129,7 +139,7 @@ class test_packing(gr_unittest.TestCase):
     def test_009(self):
         random.seed(0)
         src_data = []
-        for i in range(202):
+        for i in xrange(202):
             src_data.append((random.randint(0,255)))
         src_data = tuple(src_data)
         expected_results = src_data
@@ -148,7 +158,7 @@ class test_packing(gr_unittest.TestCase):
     def test_010(self):
         random.seed(0)
         src_data = []
-        for i in range(56):
+        for i in xrange(56):
             src_data.append((random.randint(0,255)))
         src_data = tuple(src_data)
         expected_results = src_data
@@ -166,7 +176,7 @@ class test_packing(gr_unittest.TestCase):
     def test_011(self):
         random.seed(0)
         src_data = []
-        for i in range(56):
+        for i in xrange(56):
             src_data.append((random.randint(0,255)))
         src_data = tuple(src_data)
         expected_results = src_data
@@ -186,7 +196,7 @@ class test_packing(gr_unittest.TestCase):
     def test_100a(self):
         random.seed(0)
         src_data = []
-        for i in range(100):
+        for i in xrange(100):
             src_data.append((random.randint(-2**15,2**15-1)))
         src_data = tuple(src_data)
         expected_results = src_data
@@ -204,7 +214,7 @@ class test_packing(gr_unittest.TestCase):
     def test_100b(self):
         random.seed(0)
         src_data = []
-        for i in range(100):
+        for i in xrange(100):
             src_data.append((random.randint(-2**15,2**15-1)))
         src_data = tuple(src_data)
         expected_results = src_data
@@ -222,7 +232,7 @@ class test_packing(gr_unittest.TestCase):
     def test_101a(self):
         random.seed(0)
         src_data = []
-        for i in range(100):
+        for i in xrange(100):
             src_data.append((random.randint(-2**15,2**15-1)))
         src_data = tuple(src_data)
         expected_results = src_data
@@ -240,7 +250,7 @@ class test_packing(gr_unittest.TestCase):
     def test_101b(self):
         random.seed(0)
         src_data = []
-        for i in range(100):
+        for i in xrange(100):
             src_data.append((random.randint(-2**15,2**15-1)))
         src_data = tuple(src_data)
         expected_results = src_data
@@ -260,7 +270,7 @@ class test_packing(gr_unittest.TestCase):
     def test_200a(self):
         random.seed(0)
         src_data = []
-        for i in range(100):
+        for i in xrange(100):
             src_data.append((random.randint(-2**31,2**31-1)))
         src_data = tuple(src_data)
         expected_results = src_data
@@ -278,7 +288,7 @@ class test_packing(gr_unittest.TestCase):
     def test_200b(self):
         random.seed(0)
         src_data = []
-        for i in range(100):
+        for i in xrange(100):
             src_data.append((random.randint(-2**31,2**31-1)))
         src_data = tuple(src_data)
         expected_results = src_data
@@ -296,7 +306,7 @@ class test_packing(gr_unittest.TestCase):
     def test_201a(self):
         random.seed(0)
         src_data = []
-        for i in range(100):
+        for i in xrange(100):
             src_data.append((random.randint(-2**31,2**31-1)))
         src_data = tuple(src_data)
         expected_results = src_data
@@ -314,7 +324,7 @@ class test_packing(gr_unittest.TestCase):
     def test_201b(self):
         random.seed(0)
         src_data = []
-        for i in range(100):
+        for i in xrange(100):
             src_data.append((random.randint(-2**31,2**31-1)))
         src_data = tuple(src_data)
         expected_results = src_data

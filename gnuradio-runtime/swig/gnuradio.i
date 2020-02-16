@@ -1,11 +1,23 @@
 /* -*- c++ -*- */
 /*
- * Copyright 2003,2004,2009,2012,2019 Free Software Foundation, Inc.
+ * Copyright 2003,2004,2009,2012 Free Software Foundation, Inc.
  *
  * This file is part of GNU Radio
  *
- * SPDX-License-Identifier: GPL-3.0-or-later
+ * GNU Radio is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3, or (at your option)
+ * any later version.
  *
+ * GNU Radio is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with GNU Radio; see the file COPYING.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street,
+ * Boston, MA 02110-1301, USA.
  */
 
 // Disable warning about base class types
@@ -25,6 +37,10 @@
 
 ////////////////////////////////////////////////////////////////////////
 // Headers
+
+%{
+#include "gnuradio_swig_bug_workaround.h"	// mandatory bug fix
+%}
 
 %feature("autodoc","1");
 
@@ -61,10 +77,3 @@
 %}
 
 %include <gnuradio/high_res_timer.h>
-
-////////////////////////////////////////////////////////////////////////
-// Python 2/3 compatibility
-
-%begin %{
-#define SWIG_PYTHON_CAST_MODE
-%}

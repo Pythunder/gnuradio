@@ -1,15 +1,24 @@
 #!/usr/bin/env python
 #
 # Copyright 2007 Free Software Foundation, Inc.
-#
+# 
 # This file is part of GNU Radio
-#
-# SPDX-License-Identifier: GPL-3.0-or-later
-#
-#
-
-from __future__ import print_function
-from __future__ import unicode_literals
+# 
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
+# 
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
+# 
 
 from optparse import OptionParser
 import sys
@@ -21,9 +30,9 @@ def main():
     (options, args) = parser.parse_args()
 
     if options.file == None:
-        print("Must specify file to read from using '-f'.")
+        print "Must specify file to read from using '-f'."
         sys.exit(1)
-    print("Using", options.file, "for data.")
+    print "Using", options.file, "for data."
 
     f = open(options.file, 'r')
     runs = []
@@ -31,7 +40,7 @@ def main():
     current = 0
     bytes = 0
     bits = 0
-
+    
     for ch in f.read():
         x = ord(ch)
         bytes = bytes + 1
@@ -57,16 +66,18 @@ def main():
     runs[count-1] = runs[count-1] + 1
 
     chk = 0
-    print("Bytes read: ", bytes)
-    print("Bits read:  ", bits)
-    print()
+    print "Bytes read: ", bytes
+    print "Bits read:  ", bits
+    print
     for i in range(len(runs)):
         chk = chk + runs[i]*(i+1)
-        print("Runs of length", i+1, ":", runs[i])
-    print()
-    print("Sum of runs:", chk, "bits")
-    print()
-    print("Maximum run length is", len(runs), "bits")
+        print "Runs of length", i+1, ":", runs[i]
+    print
+    print "Sum of runs:", chk, "bits"
+    print
+    print "Maximum run length is", len(runs), "bits"
 
 if __name__ == "__main__":
     main()
+
+    

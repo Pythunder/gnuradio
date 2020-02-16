@@ -5,36 +5,26 @@
 # qwt_global.h holds a string with the QWT version;
 #   test to make sure it's at least 5.2
 
-pkg_check_modules(PC_QWT "Qt5Qwt6")
-set(QWT_QT_VERSION qt5)
-
 find_path(QWT_INCLUDE_DIRS
   NAMES qwt_global.h
   HINTS
-  ${PC_QWT_INCLUDEDIR}
   ${CMAKE_INSTALL_PREFIX}/include/qwt
-  ${CMAKE_PREFIX_PATH}/include/qwt
   PATHS
-  /usr/local/include/qwt-${QWT_QT_VERSION}
+  /usr/local/include/qwt-qt4
   /usr/local/include/qwt
   /usr/include/qwt6
-  /usr/include/qt5/qwt
-  /usr/include/qwt-${QWT_QT_VERSION}
+  /usr/include/qwt-qt4
   /usr/include/qwt
-  /usr/include/${QWT_QT_VERSION}/qwt
-  /usr/include/qwt5
   /opt/local/include/qwt
   /sw/include/qwt
   /usr/local/lib/qwt.framework/Headers
 )
 
 find_library (QWT_LIBRARIES
-  NAMES ${PC_QWT_LIBRARIES} qwt6-${QWT_QT_VERSION} qwt-${QWT_QT_VERSION} qwt
+  NAMES qwt6 qwt qwt-qt4
   HINTS
-  ${PC_QWT_LIBDIR}
   ${CMAKE_INSTALL_PREFIX}/lib
   ${CMAKE_INSTALL_PREFIX}/lib64
-  ${CMAKE_PREFIX_PATH}/lib
   PATHS
   /usr/local/lib
   /usr/lib
@@ -68,11 +58,4 @@ if(QWT_FOUND)
   include ( FindPackageHandleStandardArgs )
   find_package_handle_standard_args( Qwt DEFAULT_MSG QWT_LIBRARIES QWT_INCLUDE_DIRS )
   MARK_AS_ADVANCED(QWT_LIBRARIES QWT_INCLUDE_DIRS)
-  if (Qwt_FOUND AND NOT TARGET qwt::qwt)
-    add_library(qwt::qwt INTERFACE IMPORTED)
-    set_target_properties(qwt::qwt PROPERTIES
-      INTERFACE_INCLUDE_DIRECTORIES "${QWT_INCLUDE_DIRS}"
-      INTERFACE_LINK_LIBRARIES "${QWT_LIBRARIES}"
-      )
-  endif()
 endif(QWT_FOUND)

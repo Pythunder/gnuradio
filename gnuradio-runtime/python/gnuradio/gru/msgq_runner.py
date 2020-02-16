@@ -3,8 +3,20 @@
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
 #
 
 """
@@ -28,15 +40,14 @@ To manually stop the runner, call stop() on the object.
 
 To determine if the runner has exited, call exited() on the object.
 """
-from __future__ import unicode_literals
 
 from gnuradio import gr
-import threading
+import gnuradio.gr.gr_threading as _threading
 
-class msgq_runner(threading.Thread):
+class msgq_runner(_threading.Thread):
 
     def __init__(self, msgq, callback, exit_on_error=False):
-        threading.Thread.__init__(self)
+        _threading.Thread.__init__(self)
 
         self._msgq = msgq
         self._callback = callback
@@ -55,7 +66,7 @@ class msgq_runner(threading.Thread):
             else:
                 try:
                     self._callback(msg)
-                except Exception as e:
+                except Exception, e:
                     if self._exit_on_error:
                         self._exit_error = e
                         self.stop()

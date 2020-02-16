@@ -1,18 +1,27 @@
 #!/usr/bin/env python
 #
 # Copyright 2013 Free Software Foundation, Inc.
-#
+# 
 # This file is part of GNU Radio
-#
-# SPDX-License-Identifier: GPL-3.0-or-later
-#
-#
+# 
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
+# 
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
+# 
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import unicode_literals
 import numpy
-from .constellation_map_generator import constellation_map_generator
+from constellation_map_generator import *
 
 '''
 Note on the naming scheme. Each constellation is named using a prefix
@@ -61,7 +70,7 @@ rotations are based off of.
 For 16QAM:
  - n = 4
  - (2^n)*(n!) = 384
- - k \\in [0x0, 0xF]
+ - k \in [0x0, 0xF]
  - pi = 0, 1, 2, 3
         0, 1, 3, 2
         0, 2, 1, 3
@@ -90,13 +99,13 @@ For 16QAM:
 
 def qam_16_0x0_0_1_2_3():
     '''
-    | 0010  0110 | 1110  1010
-    |
-    | 0011  0111 | 1111  1011
-    | -----------------------
-    | 0001  0101 | 1101  1001
-    |
-    | 0000  0100 | 1100  1000
+    0010  0110 | 1110  1010
+
+    0011  0111 | 1111  1011
+    -----------------------
+    0001  0101 | 1101  1001
+
+    0000  0100 | 1100  1000
     '''
     const_points = [-3-3j, -1-3j, 1-3j, 3-3j,
                     -3-1j, -1-1j, 1-1j, 3-1j,
@@ -112,108 +121,108 @@ qam_16_0 = qam_16
 
 def qam_16_0x1_0_1_2_3():
     '''
-    | 0011  0111 | 1111  1011
-    |
-    | 0010  0110 | 1110  1010
-    | -----------------------
-    | 0000  0100 | 1100  1000
-    |
-    | 0001  0101 | 1101  1001
+    0011  0111 | 1111  1011
+
+    0010  0110 | 1110  1010
+    -----------------------
+    0000  0100 | 1100  1000
+
+    0001  0101 | 1101  1001
     '''
     k = 0x1
     pi = [0, 1, 2, 3]
-    return constellation_map_generator(qam_16()[0], qam_16()[1], k, pi)
+    return constellation_map_generator(qam_16, k, pi)
 qam_16_1 = qam_16_0x1_0_1_2_3
 
 def qam_16_0x2_0_1_2_3():
     '''
-    | 0000  0100 | 1100  1000
-    |
-    | 0001  0101 | 1101  1001
-    | -----------------------
-    | 0011  0111 | 1111  1011
-    |
-    | 0010  0110 | 1110  1010
+    0000  0100 | 1100  1000
+
+    0001  0101 | 1101  1001
+    -----------------------
+    0011  0111 | 1111  1011
+
+    0010  0110 | 1110  1010
     '''
     k = 0x2
     pi = [0, 1, 2, 3]
-    return constellation_map_generator(qam_16()[0], qam_16()[1], k, pi)
+    return constellation_map_generator(qam_16, k, pi)
 qam_16_2 = qam_16_0x2_0_1_2_3
 
 def qam_16_0x3_0_1_2_3():
     '''
-    | 0001  0101 | 1101  1001
-    |
-    | 0000  0100 | 1100  1000
-    | -----------------------
-    | 0010  0110 | 1110  1010
-    |
-    | 0011  0111 | 1111  1011
+    0001  0101 | 1101  1001
+
+    0000  0100 | 1100  1000
+    -----------------------
+    0010  0110 | 1110  1010
+
+    0011  0111 | 1111  1011
     '''
     k = 0x3
     pi = [0, 1, 2, 3]
-    return constellation_map_generator(qam_16()[0], qam_16()[1], k, pi)
+    return constellation_map_generator(qam_16, k, pi)
 qam_16_3 = qam_16_0x3_0_1_2_3
 
 
 def qam_16_0x0_1_0_2_3():
     '''
-    | 0001  0101 | 1101  1001
-    |
-    | 0011  0111 | 1111  1011
-    | -----------------------
-    | 0010  0110 | 1110  1010
-    |
-    | 0000  0100 | 1100  1000
+    0001  0101 | 1101  1001
+
+    0011  0111 | 1111  1011
+    -----------------------
+    0010  0110 | 1110  1010
+
+    0000  0100 | 1100  1000
     '''
     k = 0x0
     pi = [1, 0, 2, 3]
-    return constellation_map_generator(qam_16()[0], qam_16()[1], k, pi)
+    return constellation_map_generator(qam_16, k, pi)
 qam_16_4 = qam_16_0x0_1_0_2_3
 
 def qam_16_0x1_1_0_2_3():
     '''
-    | 0000  0100 | 1100  1000
-    |
-    | 0010  0110 | 1110  1010
-    | -----------------------
-    | 0011  0111 | 1111  1011
-    |
-    | 0001  0101 | 1101  1001
+    0000  0100 | 1100  1000
+
+    0010  0110 | 1110  1010
+    -----------------------
+    0011  0111 | 1111  1011
+
+    0001  0101 | 1101  1001
     '''
     k = 0x1
     pi = [1, 0, 2, 3]
-    return constellation_map_generator(qam_16()[0], qam_16()[1], k, pi)
+    return constellation_map_generator(qam_16, k, pi)
 qam_16_5 = qam_16_0x1_1_0_2_3
 
 def qam_16_0x2_1_0_2_3():
     '''
-    | 0011  0111 | 1111  1011
-    |
-    | 0001  0101 | 1101  1001
-    | -----------------------
-    | 0000  0100 | 1100  1000
-    |
-    | 0010  0110 | 1110  1010
+    0011  0111 | 1111  1011
+
+    0001  0101 | 1101  1001
+    -----------------------
+    0000  0100 | 1100  1000
+
+    0010  0110 | 1110  1010
     '''
     k = 0x2
     pi = [1, 0, 2, 3]
-    return constellation_map_generator(qam_16()[0], qam_16()[1], k, pi)
+    return constellation_map_generator(qam_16, k, pi)
 qam_16_6 = qam_16_0x2_1_0_2_3
 
 def qam_16_0x3_1_0_2_3():
     '''
-    | 0010  0110 | 1110  1010
-    |
-    | 0000  0100 | 1100  1000
-    | -----------------------
-    | 0001  0101 | 1101  1001
-    |
-    | 0011  0111 | 1111  1011
+    0010  0110 | 1110  1010
+
+    0000  0100 | 1100  1000
+    -----------------------
+    0001  0101 | 1101  1001
+
+    0011  0111 | 1111  1011
     '''
     k = 0x3
     pi = [1, 0, 2, 3]
-    return constellation_map_generator(qam_16()[0], qam_16()[1], k, pi)
+    return constellation_map_generator(qam_16, k, pi)
 qam_16_7 = qam_16_0x3_1_0_2_3
 
 
@@ -221,20 +230,20 @@ qam_16_7 = qam_16_0x3_1_0_2_3
 
 def sd_qam_16_0x0_0_1_2_3(x, Es=1):
     '''
-    | Soft bit LUT generator for constellation:
-    |
-    | 0010  0110 | 1110  1010
-    |
-    | 0011  0111 | 1111  1011
-    | -----------------------
-    | 0001  0101 | 1101  1001
-    |
-    | 0000  0100 | 1100  1000
+    Soft bit LUT generator for constellation:
+
+    0010  0110 | 1110  1010
+
+    0011  0111 | 1111  1011
+    -----------------------
+    0001  0101 | 1101  1001
+
+    0000  0100 | 1100  1000
     '''
 
     dist = Es*numpy.sqrt(2)
-    boundary = dist / 3.0
-    dist0 = dist / 6.0
+    boundary = dist/3.0
+    dist0 = dist/6.0
 #    print "Sample:    ", x
 #    print "Es:        ", Es
 #    print "Distance:  ", dist
@@ -261,21 +270,21 @@ def sd_qam_16_0x0_0_1_2_3(x, Es=1):
     b2 = -abs(x_re) + boundary
     b0 = -abs(x_im) + boundary
 
-    return [(Es / 2.0)*b3, (Es / 2.0)*b2, (Es / 2.0)*b1, (Es / 2.0)*b0]
+    return [(Es/2)*b3, (Es/2)*b2, (Es/2)*b1, (Es/2)*b0]
 sd_qam_16 = sd_qam_16_0x0_0_1_2_3
 sd_qam_16_0 = sd_qam_16
 
 def sd_qam_16_0x1_0_1_2_3(x, Es=1):
     '''
-    | Soft bit LUT generator for constellation:
-    |
-    | 0011  0111 | 1111  1011
-    |
-    | 0010  0110 | 1110  1010
-    | -----------------------
-    | 0000  0100 | 1100  1000
-    |
-    | 0001  0101 | 1101  1001
+    Soft bit LUT generator for constellation:
+
+    0011  0111 | 1111  1011
+
+    0010  0110 | 1110  1010
+    -----------------------
+    0000  0100 | 1100  1000
+
+    0001  0101 | 1101  1001
     '''
     x_re = 3*x.real
     x_im = 3*x.imag
@@ -302,15 +311,15 @@ sd_qam_16_1 = sd_qam_16_0x1_0_1_2_3
 
 def sd_qam_16_0x2_0_1_2_3(x, Es=1):
     '''
-    | Soft bit LUT generator for constellation:
-    |
-    | 0000  0100 | 1100  1000
-    |
-    | 0001  0101 | 1101  1001
-    | -----------------------
-    | 0011  0111 | 1111  1011
-    |
-    | 0010  0110 | 1110  1010
+    Soft bit LUT generator for constellation:
+
+    0000  0100 | 1100  1000
+
+    0001  0101 | 1101  1001
+    -----------------------
+    0011  0111 | 1111  1011
+
+    0010  0110 | 1110  1010
     '''
 
     x_re = 3*x.real
@@ -338,15 +347,15 @@ sd_qam_16_2 = sd_qam_16_0x2_0_1_2_3
 
 def sd_qam_16_0x3_0_1_2_3(x, Es=1):
     '''
-    | Soft bit LUT generator for constellation:
-    |
-    | 0001  0101 | 1101  1001
-    |
-    | 0000  0100 | 1100  1000
-    | -----------------------
-    | 0010  0110 | 1110  1010
-    |
-    | 0011  0111 | 1111  1011
+    Soft bit LUT generator for constellation:
+
+    0001  0101 | 1101  1001
+
+    0000  0100 | 1100  1000
+    -----------------------
+    0010  0110 | 1110  1010
+
+    0011  0111 | 1111  1011
     '''
     x_re = 3*x.real
     x_im = 3*x.imag
@@ -373,15 +382,15 @@ sd_qam_16_3 = sd_qam_16_0x3_0_1_2_3
 
 def sd_qam_16_0x0_1_0_2_3(x, Es=1):
     '''
-    | Soft bit LUT generator for constellation:
-    |
-    | 0001  0101 | 1101  1001
-    |
-    | 0011  0111 | 1111  1011
-    | -----------------------
-    | 0010  0110 | 1110  1010
-    |
-    | 0000  0100 | 1100  1000
+    Soft bit LUT generator for constellation:
+
+    0001  0101 | 1101  1001
+
+    0011  0111 | 1111  1011
+    -----------------------
+    0010  0110 | 1110  1010
+
+    0000  0100 | 1100  1000
     '''
     x_re = 3*x.real
     x_im = 3*x.imag
@@ -408,15 +417,15 @@ sd_qam_16_4 = sd_qam_16_0x0_1_0_2_3
 
 def sd_qam_16_0x1_1_0_2_3(x, Es=1):
     '''
-    | Soft bit LUT generator for constellation:
-    |
-    | 0000  0100 | 1100  1000
-    |
-    | 0010  0110 | 1110  1010
-    | -----------------------
-    | 0011  0111 | 1111  1011
-    |
-    | 0001  0101 | 1101  1001
+    Soft bit LUT generator for constellation:
+
+    0000  0100 | 1100  1000
+
+    0010  0110 | 1110  1010
+    -----------------------
+    0011  0111 | 1111  1011
+
+    0001  0101 | 1101  1001
     '''
     x_re = 3*x.real
     x_im = 3*x.imag
@@ -443,15 +452,15 @@ sd_qam_16_5 = sd_qam_16_0x1_1_0_2_3
 
 def sd_qam_16_0x2_1_0_2_3(x, Es=1):
     '''
-    | Soft bit LUT generator for constellation:
-    |
-    | 0011  0111 | 1111  1011
-    |
-    | 0001  0101 | 1101  1001
-    | -----------------------
-    | 0000  0100 | 1100  1000
-    |
-    | 0010  0110 | 1110  1010
+    Soft bit LUT generator for constellation:
+
+    0011  0111 | 1111  1011
+
+    0001  0101 | 1101  1001
+    -----------------------
+    0000  0100 | 1100  1000
+
+    0010  0110 | 1110  1010
     '''
     x_re = 3*x.real
     x_im = 3*x.imag
@@ -478,15 +487,15 @@ sd_qam_16_6 = sd_qam_16_0x2_1_0_2_3
 
 def sd_qam_16_0x3_1_0_2_3(x, Es=1):
     '''
-    | Soft bit LUT generator for constellation:
-    |
-    | 0010  0110 | 1110  1010
-    |
-    | 0000  0100 | 1100  1000
-    | -----------------------
-    | 0001  0101 | 1101  1001
-    |
-    | 0011  0111 | 1111  1011
+    Soft bit LUT generator for constellation:
+
+    0010  0110 | 1110  1010
+
+    0000  0100 | 1100  1000
+    -----------------------
+    0001  0101 | 1101  1001
+
+    0011  0111 | 1111  1011
     '''
     x_re = 3*x.real
     x_im = 3*x.imag

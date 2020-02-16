@@ -1,29 +1,36 @@
 #
-# Copyright 2011-2012, 2018 Free Software Foundation, Inc.
+# Copyright 2011-2012 Free Software Foundation, Inc.
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
 #
 
-from __future__ import print_function
-from __future__ import unicode_literals
-
-
+import runtime_swig as gr
+from runtime_swig import io_signature, io_signaturev
+from runtime_swig import block_gw_message_type
+from runtime_swig import block_gateway
 import numpy
-
-from . import runtime_swig as gr
-from .runtime_swig import io_signature, io_signaturev
-from .runtime_swig import block_gw_message_type
-from .runtime_swig import block_gateway
 
 ########################################################################
 # Magic to turn pointers into numpy arrays
 # http://docs.scipy.org/doc/numpy/reference/arrays.interface.html
 ########################################################################
 def pointer_to_ndarray(addr, dtype, nitems):
-    class array_like(object):
+    class array_like:
         __array_interface__ = {
             'data' : (int(addr), False),
             'typestr' : dtype.base.str,
@@ -39,7 +46,7 @@ def pointer_to_ndarray(addr, dtype, nitems):
 ########################################################################
 class gateway_handler(gr.feval_ll):
 
-    #don't put a constructor, it won't work
+    #dont put a constructor, it wont work
 
     def init(self, callback):
         self._callback = callback
@@ -57,7 +64,7 @@ class gateway_handler(gr.feval_ll):
 ########################################################################
 class msg_handler(gr.feval_p):
 
-    #don't put a constructor, it won't work
+    #dont put a constructor, it wont work
 
     def init(self, callback):
         self._callback = callback
@@ -71,89 +78,35 @@ class msg_handler(gr.feval_p):
         return 0
 
 ########################################################################
-# io_signature for Python
-########################################################################
-class py_io_signature(object):
-    """
-    Describes the type/number of ports for block input or output.
-    """
-
-    # Minimum and maximum number of ports, and a list of numpy types.
-    def __init__(self, min_ports, max_ports, type_list):
-        """
-        Args:
-
-        min_ports (int): minimum number of connected ports.
-
-        max_ports (int): maximum number of connected ports. -1 indicates
-        no limit.
-
-        type_list (list[str]): numpy type names for each port. If the
-        number of connected ports is greater than the number of types
-        provided, the last type in the list is repeated.
-        """
-        self.__min_ports = min_ports
-        self.__max_ports = max_ports
-        self.__types = tuple( numpy.dtype(t) for t in type_list )
-
-    def gr_io_signature(self):
-        """
-        Make/return a gr.io_signature. A non-empty list of sizes is
-        required, even if there are no ports.
-        """
-        return io_signaturev(self.__min_ports, self.__max_ports,
-                             [t.itemsize for t in self.__types] or [0])
-
-    def port_types(self, nports):
-        """
-        Return data types for the first nports ports. If nports is
-        smaller than the provided type list, return a truncated list. If
-        larger, fill with the last type.
-        """
-        ntypes = len(self.__types)
-        if ntypes == 0:
-            return ()
-        if nports <= ntypes:
-            return self.__types[:nports]
-        return self.__types + [self.__types[-1]]*(nports-ntypes)
-
-    def __iter__(self):
-        """
-        Return the iterator over the maximum ports type list.
-        """
-        return iter(self.port_types(self.__max_ports))
-
-    def __hash__(self):
-        return hash((self.__min_ports, self.__max_ports, self.__types))
-
-########################################################################
 # The guts that make this into a gr block
 ########################################################################
 class gateway_block(object):
 
     def __init__(self, name, in_sig, out_sig, work_type, factor):
 
-        # Normalize the many Python ways of saying 'nothing' to '()'
-        in_sig = in_sig or ()
-        out_sig = out_sig or ()
+        #ensure that the sigs are iterable dtypes
+        def sig_to_dtype_sig(sig):
+            if sig is None: sig = ()
+            return map(numpy.dtype, sig)
+        self.__in_sig = sig_to_dtype_sig(in_sig)
+        self.__out_sig = sig_to_dtype_sig(out_sig)
 
-        # Backward compatibility: array of type strings -> py_io_signature
-        if type(in_sig) is py_io_signature:
-            self.__in_sig = in_sig
-        else:
-            self.__in_sig = py_io_signature(len(in_sig), len(in_sig), in_sig)
-        if type(out_sig) is py_io_signature:
-            self.__out_sig = out_sig
-        else:
-            self.__out_sig = py_io_signature(len(out_sig), len(out_sig), out_sig)
+        #cache the ranges to iterate when dispatching work
+        self.__in_indexes = range(len(self.__in_sig))
+        self.__out_indexes = range(len(self.__out_sig))
+
+        #convert the signatures into gr.io_signatures
+        def sig_to_gr_io_sigv(sig):
+            if not len(sig): return io_signature(0, 0, 0)
+            return io_signaturev(len(sig), len(sig), [s.itemsize for s in sig])
+        gr_in_sig = sig_to_gr_io_sigv(self.__in_sig)
+        gr_out_sig = sig_to_gr_io_sigv(self.__out_sig)
 
         #create internal gateway block
         self.__handler = gateway_handler()
         self.__handler.init(self.__gr_block_handle)
         self.__gateway = block_gateway(
-            self.__handler, name,
-            self.__in_sig.gr_io_signature(), self.__out_sig.gr_io_signature(),
-            work_type, factor)
+            self.__handler, name, gr_in_sig, gr_out_sig, work_type, factor)
         self.__message = self.__gateway.block_message()
 
         #dict to keep references to all message handlers
@@ -175,47 +128,36 @@ class gateway_block(object):
         """
         Dispatch tasks according to the action type specified in the message.
         """
-
         if self.__message.action == gr.block_gw_message_type.ACTION_GENERAL_WORK:
-            # Actual number of inputs/output from scheduler
-            ninputs = len(self.__message.general_work_args_input_items)
-            noutputs = len(self.__message.general_work_args_output_items)
-            in_types = self.__in_sig.port_types(ninputs)
-            out_types = self.__out_sig.port_types(noutputs)
             self.__message.general_work_args_return_value = self.general_work(
 
                 input_items=[pointer_to_ndarray(
                     self.__message.general_work_args_input_items[i],
-                    in_types[i],
+                    self.__in_sig[i],
                     self.__message.general_work_args_ninput_items[i]
-                ) for i in range(ninputs)],
+                ) for i in self.__in_indexes],
 
                 output_items=[pointer_to_ndarray(
                     self.__message.general_work_args_output_items[i],
-                    out_types[i],
+                    self.__out_sig[i],
                     self.__message.general_work_args_noutput_items
-                ) for i in range(noutputs)],
+                ) for i in self.__out_indexes],
             )
 
         elif self.__message.action == gr.block_gw_message_type.ACTION_WORK:
-            # Actual number of inputs/output from scheduler
-            ninputs = len(self.__message.work_args_input_items)
-            noutputs = len(self.__message.work_args_output_items)
-            in_types = self.__in_sig.port_types(ninputs)
-            out_types = self.__out_sig.port_types(noutputs)
             self.__message.work_args_return_value = self.work(
 
                 input_items=[pointer_to_ndarray(
                     self.__message.work_args_input_items[i],
-                    in_types[i],
+                    self.__in_sig[i],
                     self.__message.work_args_ninput_items
-                ) for i in range(ninputs)],
+                ) for i in self.__in_indexes],
 
                 output_items=[pointer_to_ndarray(
                     self.__message.work_args_output_items[i],
-                    out_types[i],
+                    self.__out_sig[i],
                     self.__message.work_args_noutput_items
-                ) for i in range(noutputs)],
+                ) for i in self.__out_indexes],
             )
 
         elif self.__message.action == gr.block_gw_message_type.ACTION_FORECAST:
@@ -235,8 +177,9 @@ class gateway_block(object):
         forecast is only called from a general block
         this is the default implementation
         """
-        for i in range(len(ninput_items_required)):
-            ninput_items_required[i] = noutput_items + self.history() - 1
+        for ninput_item in ninput_items_required:
+            ninput_item = noutput_items + self.history() - 1;
+        return
 
     def general_work(self, *args, **kwargs):
         """general work to be overloaded in a derived class"""
@@ -246,11 +189,8 @@ class gateway_block(object):
         """work to be overloaded in a derived class"""
         raise NotImplementedError("work not implemented")
 
-    def start(self):
-        return True
-
-    def stop(self):
-        return True
+    def start(self): return True
+    def stop(self): return True
 
     def set_msg_handler(self, which_port, handler_func):
         handler = msg_handler()
@@ -259,28 +199,10 @@ class gateway_block(object):
         # Save handler object in class so it's not garbage collected
         self.__msg_handlers[which_port] = handler
 
-    def in_sig(self):
-        return self.__in_sig
-
-    def out_sig(self):
-        return self.__out_sig
-
-
 ########################################################################
 # Wrappers for the user to inherit from
 ########################################################################
 class basic_block(gateway_block):
-    """Args:
-    name (str): block name
-
-    in_sig (gr.py_io_signature): input port signature
-
-    out_sig (gr.py_io_signature): output port signature
-
-    For backward compatibility, a sequence of numpy type names is also
-    accepted as an io signature.
-
-    """
     def __init__(self, name, in_sig, out_sig):
         gateway_block.__init__(self,
             name=name,
@@ -291,17 +213,6 @@ class basic_block(gateway_block):
         )
 
 class sync_block(gateway_block):
-    """
-    Args:
-    name (str): block name
-
-    in_sig (gr.py_io_signature): input port signature
-
-    out_sig (gr.py_io_signature): output port signature
-
-    For backward compatibility, a sequence of numpy type names is also
-    accepted as an io signature.
-    """
     def __init__(self, name, in_sig, out_sig):
         gateway_block.__init__(self,
             name=name,
@@ -312,17 +223,6 @@ class sync_block(gateway_block):
         )
 
 class decim_block(gateway_block):
-    """
-    Args:
-    name (str): block name
-
-    in_sig (gr.py_io_signature): input port signature
-
-    out_sig (gr.py_io_signature): output port signature
-
-    For backward compatibility, a sequence of numpy type names is also
-    accepted as an io signature.
-    """
     def __init__(self, name, in_sig, out_sig, decim):
         gateway_block.__init__(self,
             name=name,
@@ -333,17 +233,6 @@ class decim_block(gateway_block):
         )
 
 class interp_block(gateway_block):
-    """
-    Args:
-    name (str): block name
-
-    in_sig (gr.py_io_signature): input port signature
-
-    out_sig (gr.py_io_signature): output port signature
-
-    For backward compatibility, a sequence of numpy type names is also
-    accepted as an io signature.
-    """
     def __init__(self, name, in_sig, out_sig, interp):
         gateway_block.__init__(self,
             name=name,

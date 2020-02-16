@@ -1,11 +1,8 @@
 #!/usr/bin/env python
 
-from __future__ import division
-from __future__ import unicode_literals
 import sys, math
 import argparse
-from volk_test_funcs import (create_connection, list_tables, get_results,
-                             helper, timeit, format_results)
+from volk_test_funcs import *
 
 try:
     import matplotlib
@@ -103,7 +100,7 @@ def main():
 
 
     # Plot the results
-    x0 = list(range(len(name_reg)))
+    x0 = xrange(len(name_reg))
     i = 0
     for t in (table_data):
         ydata = []
@@ -122,7 +119,7 @@ def main():
             if(args.percent != t):
                 # makes x values for this data set placement
                 # width of bars depends on number of comparisons
-                wdth = 0.80 / (M-1)
+                wdth = 0.80/(M-1)
                 x1 = [x + i*wdth for x in x0]
                 i += 1
 
@@ -133,7 +130,7 @@ def main():
         else:
             # makes x values for this data set placement
             # width of bars depends on number of comparisons
-            wdth = 0.80 / M
+            wdth = 0.80/M
             x1 = [x + i*wdth for x in x0]
             i += 1
 

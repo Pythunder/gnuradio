@@ -2,13 +2,23 @@
 Copyright 2007 Free Software Foundation, Inc.
 This file is part of GNU Radio
 
-SPDX-License-Identifier: GPL-2.0-or-later
+GNU Radio Companion is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
 
+GNU Radio Companion is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 """
 
-from __future__ import absolute_import
-from . import Actions
-from .Constants import STATE_CACHE_SIZE
+import Actions
+from Constants import STATE_CACHE_SIZE
 
 class StateCache(object):
     """
@@ -20,9 +30,9 @@ class StateCache(object):
     def __init__(self, initial_state):
         """
         StateCache constructor.
-
+        
         Args:
-            initial_state: the initial state (nested data)
+            initial_state: the intial state (nested data)
         """
         self.states = [None] * STATE_CACHE_SIZE #fill states
         self.current_state_index = 0
@@ -35,7 +45,7 @@ class StateCache(object):
         """
         Save a new state.
         Place the new state at the next index and add one to the number of previous states.
-
+        
         Args:
             state: the new state
         """
@@ -49,7 +59,7 @@ class StateCache(object):
     def get_current_state(self):
         """
         Get the state at the current index.
-
+        
         Returns:
             the current state (nested data)
         """
@@ -59,7 +69,7 @@ class StateCache(object):
     def get_prev_state(self):
         """
         Get the previous state and decrement the current index.
-
+        
         Returns:
             the previous state or None
         """
@@ -73,7 +83,7 @@ class StateCache(object):
     def get_next_state(self):
         """
         Get the nest state and increment the current index.
-
+        
         Returns:
             the next state or None
         """
@@ -88,5 +98,5 @@ class StateCache(object):
         """
         Update the undo and redo actions based on the number of next and prev states.
         """
-        Actions.FLOW_GRAPH_REDO.set_enabled(self.num_next_states != 0)
-        Actions.FLOW_GRAPH_UNDO.set_enabled(self.num_prev_states != 0)
+        Actions.FLOW_GRAPH_REDO.set_sensitive(self.num_next_states != 0)
+        Actions.FLOW_GRAPH_UNDO.set_sensitive(self.num_prev_states != 0)

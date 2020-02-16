@@ -1,11 +1,23 @@
 /* -*- c++ -*- */
 /*
- * Copyright 2002,2015,2018 Free Software Foundation, Inc.
+ * Copyright 2002 Free Software Foundation, Inc.
  *
  * This file is part of GNU Radio
  *
- * SPDX-License-Identifier: GPL-3.0-or-later
+ * GNU Radio is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3, or (at your option)
+ * any later version.
  *
+ * GNU Radio is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with GNU Radio; see the file COPYING.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street,
+ * Boston, MA 02110-1301, USA.
  */
 
 /*
@@ -27,105 +39,150 @@
 #include <config.h>
 #endif
 
-#include <gnuradio/math.h>
+#include <math.h>
 #include <gnuradio/random.h>
-
-#include <cmath>
 
 namespace gr {
 
-random::random(unsigned int seed, int min_integer, int max_integer)
-    : d_rng(), d_integer_dis(0, 1)
-{
-    d_gauss_stored = false; // set gasdev (gauss distributed numbers) on calculation state
+#define IA 16807
+#define IM 2147483647
+#define AM (1.0/IM)
+#define IQ 127773
+#define IR 2836
+#define NDIV (1+(IM-1)/NTAB)
+#define EPS 1.2e-7
+#define RNMX (1.0-EPS)
 
-    // Setup random number generators
-    reseed(seed); // set seed for random number generator
-    set_integer_limits(min_integer, max_integer);
-}
+  random::random(long seed)
+  {
+    reseed(seed);
+  }
 
-random::~random() {}
-
-/*
- * Seed is initialized with time if the given seed is 0. Otherwise the seed is taken
- * directly. Sets the seed for the random number generator.
- */
-void random::reseed(unsigned int seed)
-{
+  void
+  random::reseed(long seed)
+  {
     d_seed = seed;
-    if (d_seed == 0) {
-        d_rng.seed();
-    } else {
-        d_rng.seed(d_seed);
+    d_iy = 0;
+    for(int i = 0; i < NTAB; i++)
+      d_iv[i] = 0;
+    d_iset = 0;
+    d_gset = 0;
+  }
+
+  /*
+   * This looks like it returns a uniform random deviate between 0.0 and 1.0
+   * It looks similar to code from "Numerical Recipes in C".
+   */
+  float
+  random::ran1()
+  {
+    int j;
+    long k;
+    float temp;
+
+    if(d_seed <= 0 || !d_iy)  {
+      if(-d_seed < 1)
+        d_seed=1;
+      else
+        d_seed = -d_seed;
+      for(j=NTAB+7;j>=0;j--) {
+        k=d_seed/IQ;
+        d_seed=IA*(d_seed-k*IQ)-IR*k;
+        if(d_seed < 0)
+          d_seed += IM;
+        if(j < NTAB)
+          d_iv[j] = d_seed;
+      }
+      d_iy=d_iv[0];
     }
-}
+    k=(d_seed)/IQ;
+    d_seed=IA*(d_seed-k*IQ)-IR*k;
+    if(d_seed < 0)
+      d_seed += IM;
+    j=d_iy/NDIV;
+    d_iy=d_iv[j];
+    d_iv[j] = d_seed;
+    temp=AM * d_iy;
+    if(temp > RNMX)
+      temp = RNMX;
+    return temp;
+  }
 
-void random::set_integer_limits(const int minimum, const int maximum)
-{
-    // boost expects integer limits defined as [minimum, maximum] which is unintuitive.
-    // use the expected half open interval behavior! [minimum, maximum)!
-    d_integer_dis = std::uniform_int_distribution<>(minimum, maximum - 1);
-}
-
-/*!
- * Uniform random integers in the range set by 'set_integer_limits' [min, max).
- */
-int random::ran_int() { return d_integer_dis(d_rng); }
-
-/*
- * Returns uniformly distributed numbers in [0,1) taken from boost.random using a Mersenne
- * twister
- */
-float random::ran1() { return d_uniform(d_rng); }
-
-/*
- * Returns a normally distributed deviate with zero mean and variance 1.
- * Used is the Marsaglia polar method.
- * Every second call a number is stored because the transformation works only in pairs.
- * Otherwise half calculation is thrown away.
- */
-float random::gasdev()
-{
-    if (d_gauss_stored) { // just return the stored value if available
-        d_gauss_stored = false;
-        return d_gauss_value;
-    } else { // generate a pair of gaussian distributed numbers
-        float x, y, s;
-        do {
-            x = 2.0 * ran1() - 1.0;
-            y = 2.0 * ran1() - 1.0;
-            s = x * x + y * y;
-        } while (s >= 1.0f || s == 0.0f);
-        d_gauss_stored = true;
-        d_gauss_value = x * sqrtf(-2.0 * logf(s) / s);
-        return y * sqrtf(-2.0 * logf(s) / s);
+  /*
+   * Returns a normally distributed deviate with zero mean and variance 1.
+   * Also looks like it's from "Numerical Recipes in C".
+   */
+  float
+  random::gasdev()
+  {
+    float fac,rsq,v1,v2;
+    d_iset = 1 - d_iset;
+    if(d_iset) {
+      do {
+        v1=2.0*ran1()-1.0;
+        v2=2.0*ran1()-1.0;
+        rsq=v1*v1+v2*v2;
+      } while(rsq >= 1.0 || rsq == 0.0);
+      fac= sqrt(-2.0*log(rsq)/rsq);
+      d_gset=v1*fac;
+      return v2*fac;
     }
-}
+    return d_gset;
+  }
 
-float random::laplacian()
-{
+  /*
+   * Copied from The KC7WW / OH2BNS Channel Simulator
+   * FIXME Need to check how good this is at some point
+   */
+  float
+  random::laplacian()
+  {
     float z = ran1();
-    if (z > 0.5f) {
-        return -logf(2.0f * (1.0f - z));
-    }
-    return logf(2 * z);
-}
-/*
- * Copied from The KC7WW / OH2BNS Channel Simulator
- * FIXME Need to check how good this is at some point
- */
-// 5 => scratchy, 8 => Geiger
-float random::impulse(float factor = 5)
-{
-    float z = -GR_M_SQRT2 * logf(ran1());
-    if (fabsf(z) <= factor)
-        return 0.0;
+    if(z < 0.5)
+      return log(2.0 * z) / M_SQRT2;
     else
-        return z;
-}
+      return -log(2.0 * (1.0 - z)) / M_SQRT2;
+  }
 
-gr_complex random::rayleigh_complex() { return gr_complex(gasdev(), gasdev()); }
+  /*
+   * Copied from The KC7WW / OH2BNS Channel Simulator
+   * FIXME Need to check how good this is at some point
+   */
+  // 5 => scratchy, 8 => Geiger
+  float
+  random::impulse(float factor = 5)
+  {
+    float z = -M_SQRT2 * log(ran1());
+    if(fabsf(z) <= factor)
+      return 0.0;
+    else
+      return z;
+  }
 
-float random::rayleigh() { return sqrtf(-2.0 * logf(ran1())); }
+  /*
+   * Complex rayleigh is really gaussian I and gaussian Q
+   * It can also be generated by real rayleigh magnitude and
+   * uniform random angle
+   * Adapted from The KC7WW / OH2BNS Channel Simulator
+   * FIXME Need to check how good this is at some point
+   */
+  gr_complex
+  random::rayleigh_complex()
+  {
+    return gr_complex(gasdev(),gasdev());
+  }
+
+  /*   Other option
+       mag = rayleigh();
+       ang = 2.0 * M_PI * RNG();
+       *Rx = rxx * cos(z);
+       *Iy = rxx * sin(z);
+       */
+
+  float
+  random::rayleigh()
+  {
+    return sqrt(-2.0 * log(ran1()));
+  }
 
 } /* namespace gr */

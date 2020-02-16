@@ -4,16 +4,26 @@
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
 #
 
-from __future__ import absolute_import
-from __future__ import unicode_literals
 from gnuradio import gr, blocks
 import numpy
 
-from .fec_test import fec_test
+from fec_test import fec_test
 
 class bercurve_generator(gr.hier_block2):
 
@@ -30,16 +40,10 @@ class bercurve_generator(gr.hier_block2):
         self.decoder_list = decoder_list
         self.puncpat = puncpat
 
-        self.random_gen_b_0 = blocks.vector_source_b(list(map(int, numpy.random.randint(0, 256, 100000))), True)
+        self.random_gen_b_0 = blocks.vector_source_b(map(int, numpy.random.randint(0, 256, 100000)), True)
         self.deinterleave = blocks.deinterleave(gr.sizeof_char*1)
         self.connect(self.random_gen_b_0, self.deinterleave)
         self.ber_generators = []
-
-        # FIXME It would be good to check that the encoder_list and
-        # decoder_list have parallelism set to > 0. If parallelism
-        # is set to 0, a map isn't passed and an indexing error is
-        # thrown on line 53 or 54 below.
-
         for i in range(0, len(esno)):
             ber_generator_temp = fec_test(
                 generic_encoder=encoder_list[i],

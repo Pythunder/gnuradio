@@ -4,11 +4,22 @@
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
 #
 
-from __future__ import unicode_literals
 import math
 import sys
 
@@ -27,8 +38,8 @@ def gen_approx_table (f, nentries, min_x, max_x):
     for i in range (nentries):
         a = (i * incx) + min_x
         b = ((i + 1) * incx) + min_x
-        m = (f(b)-f(a)) / (b-a)
-        c = (3.0*a+b)*(f(a)-f(b))/(4.0*(b-a)) + (f((a+b)/2.0) + f(a))/2.0
+        m = (f(b)-f(a))/(b-a)
+        c = (3*a+b)*(f(a)-f(b))/(4*(b-a)) + (f((a+b)/2) + f(a))/2
         abs_error = c+m*a-f(a)
         r.append ((m, c, abs_error))
     return r
@@ -58,7 +69,7 @@ def gen_sine_table ():
     # sys.stdout.write ('static const double sine_table[%d][2] = {\n'% (nentries,))
 
     for e in t:
-        sys.stdout.write ('  { %22.15e, %22.15e },\n' % (2.0 * e[0], e[1]))
+        sys.stdout.write ('  { %22.15e, %22.15e },\n' % (2 * e[0], e[1]))
 
     # sys.stdout.write ('};\n')
 

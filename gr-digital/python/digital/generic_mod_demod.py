@@ -3,33 +3,54 @@
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 #
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
+#
+
+# See gnuradio-examples/python/digital for examples
 
 """
 Generic modulation and demodulation.
 """
 
-# See gnuradio-examples/python/digital for examples
-
-from __future__ import print_function
-from __future__ import absolute_import
-from __future__ import unicode_literals
-
-from gnuradio import gr, blocks, filter, analog
-from .modulation_utils import extract_kwargs_from_options_for_class
-from .utils import mod_codes
-from . import digital_swig as digital
+from gnuradio import gr
+from modulation_utils import extract_kwargs_from_options_for_class
+from utils import mod_codes
+import digital_swig as digital
 import math
 
+try:
+    from gnuradio import blocks
+except ImportError:
+    import blocks_swig as blocks
+
+try:
+    from gnuradio import filter
+except ImportError:
+    import filter_swig as filter
+
+try:
+    from gnuradio import analog
+except ImportError:
+    import analog_swig as analog
 
 # default values (used in __init__ and add_options)
 _def_samples_per_symbol = 2
 _def_excess_bw = 0.35
 _def_verbose = False
 _def_log = False
-_def_truncate = False
 
 # Frequency correction
 _def_freq_bw = 2*math.pi/100.0
@@ -60,7 +81,7 @@ def add_common_options(parser):
                       help="Select modulation code from: %s [default=%%default]"
                             % (', '.join(mod_codes.codes),))
     parser.add_option("", "--excess-bw", type="float", default=_def_excess_bw,
-                      help="set RRC excess bandwidth factor [default=%default]")
+                      help="set RRC excess bandwith factor [default=%default]")
 
 
 # /////////////////////////////////////////////////////////////////////////////
@@ -82,7 +103,6 @@ class generic_mod(gr.hier_block2):
         excess_bw: Root-raised cosine filter excess bandwidth (float)
         verbose: Print information about modulator? (boolean)
         log: Log modulation data to files? (boolean)
-        truncate: Truncate the modulated output to account for the RRC filter response (boolean)
     """
 
     def __init__(self, constellation,
@@ -91,12 +111,11 @@ class generic_mod(gr.hier_block2):
                  pre_diff_code=True,
                  excess_bw=_def_excess_bw,
                  verbose=_def_verbose,
-                 log=_def_log,
-                 truncate=_def_truncate):
+                 log=_def_log):
 
-        gr.hier_block2.__init__(self, "generic_mod",
-                                gr.io_signature(1, 1, gr.sizeof_char),       # Input signature
-                                gr.io_signature(1, 1, gr.sizeof_gr_complex)) # Output signature
+	gr.hier_block2.__init__(self, "generic_mod",
+				gr.io_signature(1, 1, gr.sizeof_char),       # Input signature
+				gr.io_signature(1, 1, gr.sizeof_gr_complex)) # Output signature
 
         self._constellation = constellation
         self._samples_per_symbol = samples_per_symbol
@@ -106,7 +125,7 @@ class generic_mod(gr.hier_block2):
         self.pre_diff_code = pre_diff_code and self._constellation.apply_pre_diff_code()
 
         if self._samples_per_symbol < 2:
-            raise TypeError("sps must be >= 2, is %f" % self._samples_per_symbol)
+            raise TypeError, ("sps must be >= 2, is %f" % self._samples_per_symbol)
 
         arity = pow(2,self.bits_per_symbol())
 
@@ -124,8 +143,7 @@ class generic_mod(gr.hier_block2):
 
         # pulse shaping filter
         nfilts = 32
-        ntaps_per_filt = 11
-        ntaps = nfilts * ntaps_per_filt * int(self._samples_per_symbol)    # make nfilts filters of ntaps each
+        ntaps = nfilts * 11 * int(self._samples_per_symbol)    # make nfilts filters of ntaps each
         self.rrc_taps = filter.firdes.root_raised_cosine(
             nfilts,          # gain
             nfilts,          # sampling rate based on 32 filters in resampler
@@ -135,23 +153,13 @@ class generic_mod(gr.hier_block2):
         self.rrc_filter = filter.pfb_arb_resampler_ccf(self._samples_per_symbol,
                                                        self.rrc_taps)
 
-        # Remove the filter transient at the beginning of the transmission
-        if truncate:
-            fsps = float(self._samples_per_symbol)
-            len_filt_delay = (ntaps_per_filt*fsps*fsps-fsps)/2.0 # Length of delay through rrc filter
-            self.skiphead = blocks.skiphead(gr.sizeof_gr_complex*1, len_filt_delay)
-
-        # Connect
+	# Connect
         self._blocks = [self, self.bytes2chunks]
         if self.pre_diff_code:
             self._blocks.append(self.symbol_mapper)
         if differential:
             self._blocks.append(self.diffenc)
-        self._blocks += [self.chunks2symbols, self.rrc_filter]
-        
-        if truncate:
-            self._blocks.append(self.skiphead)
-        self._blocks.append(self)
+        self._blocks += [self.chunks2symbols, self.rrc_filter, self]
         self.connect(*self._blocks)
 
         if verbose:
@@ -167,12 +175,12 @@ class generic_mod(gr.hier_block2):
     def bits_per_symbol(self):   # static method that's also callable on an instance
         return self._constellation.bits_per_symbol()
 
-    @staticmethod
     def add_options(parser):
         """
         Adds generic modulation options to the standard parser
         """
         add_common_options(parser)
+    add_options=staticmethod(add_options)
 
     def extract_kwargs_from_options(cls, options):
         """
@@ -183,12 +191,12 @@ class generic_mod(gr.hier_block2):
 
 
     def _print_verbage(self):
-        print("\nModulator:")
-        print("bits per symbol:     %d" % self.bits_per_symbol())
-        print("RRC roll-off factor: %.2f" % self._excess_bw)
+        print "\nModulator:"
+        print "bits per symbol:     %d" % self.bits_per_symbol()
+        print "RRC roll-off factor: %.2f" % self._excess_bw
 
     def _setup_logging(self):
-        print("Modulation logging turned on.")
+        print "Modulation logging turned on."
         self.connect(self.bytes2chunks,
                      blocks.file_sink(gr.sizeof_char, "tx_bytes2chunks.8b"))
         if self.pre_diff_code:
@@ -241,9 +249,9 @@ class generic_demod(gr.hier_block2):
                  verbose=_def_verbose,
                  log=_def_log):
 
-        gr.hier_block2.__init__(self, "generic_demod",
-                                gr.io_signature(1, 1, gr.sizeof_gr_complex), # Input signature
-                                gr.io_signature(1, 1, gr.sizeof_char))       # Output signature
+	gr.hier_block2.__init__(self, "generic_demod",
+				gr.io_signature(1, 1, gr.sizeof_gr_complex), # Input signature
+				gr.io_signature(1, 1, gr.sizeof_char))       # Output signature
 
         self._constellation = constellation
         self._samples_per_symbol = samples_per_symbol
@@ -255,7 +263,7 @@ class generic_demod(gr.hier_block2):
         self._differential = differential
 
         if self._samples_per_symbol < 2:
-            raise TypeError("sps must be >= 2, is %d" % self._samples_per_symbol)
+            raise TypeError, ("sps must be >= 2, is %d" % self._samples_per_symbol)
 
         # Only apply a predifferential coding if the constellation also supports it.
         self.pre_diff_code = pre_diff_code and self._constellation.apply_pre_diff_code()
@@ -316,19 +324,19 @@ class generic_demod(gr.hier_block2):
     def samples_per_symbol(self):
         return self._samples_per_symbol
 
-    def bits_per_symbol(self):
+    def bits_per_symbol(self):   # staticmethod that's also callable on an instance
         return self._constellation.bits_per_symbol()
 
     def _print_verbage(self):
-        print("\nDemodulator:")
-        print("bits per symbol:     %d"   % self.bits_per_symbol())
-        print("RRC roll-off factor: %.2f" % self._excess_bw)
-        print("FLL bandwidth:       %.2e" % self._freq_bw)
-        print("Timing bandwidth:    %.2e" % self._timing_bw)
-        print("Phase bandwidth:     %.2e" % self._phase_bw)
+        print "\nDemodulator:"
+        print "bits per symbol:     %d"   % self.bits_per_symbol()
+        print "RRC roll-off factor: %.2f" % self._excess_bw
+        print "FLL bandwidth:       %.2e" % self._freq_bw
+        print "Timing bandwidth:    %.2e" % self._timing_bw
+        print "Phase bandwidth:     %.2e" % self._phase_bw
 
     def _setup_logging(self):
-        print("Modulation logging turned on.")
+        print "Modulation logging turned on."
         self.connect(self.agc,
                      blocks.file_sink(gr.sizeof_gr_complex, "rx_agc.32fc"))
         self.connect((self.freq_recov, 0),
@@ -364,7 +372,6 @@ class generic_demod(gr.hier_block2):
         self.connect(self.unpack,
                      blocks.file_sink(gr.sizeof_char, "rx_unpack.8b"))
 
-    @staticmethod
     def add_options(parser):
         """
         Adds generic demodulation options to the standard parser
@@ -378,6 +385,7 @@ class generic_demod(gr.hier_block2):
                           help="set phase tracking loop lock-in bandwidth [default=%default]")
         parser.add_option("", "--timing-bw", type="float", default=_def_timing_bw,
                           help="set timing symbol sync loop gain lock-in bandwidth [default=%default]")
+    add_options=staticmethod(add_options)
 
     def extract_kwargs_from_options(cls, options):
         """

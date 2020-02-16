@@ -4,10 +4,21 @@
 # 
 # This file is part of GNU Radio
 # 
-# SPDX-License-Identifier: GPL-3.0-or-later
-#
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 # 
-
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
+# 
 
 from gnuradio import gr, gr_unittest, digital, blocks
 import pmt
@@ -34,7 +45,7 @@ class test_hdlc_framer(gr_unittest.TestCase):
         self.tb.msg_connect(deframe, "out", debug, "store")
         self.tb.start()
         msg = pmt.cons(pmt.PMT_NIL, pmt.init_u8vector(len(src_data),src_data))
-        for i in range(npkts):
+        for i in xrange(npkts):
             frame.to_basic_block()._post(pmt.intern("in"), msg)
         sleep(0.2)
         self.tb.stop()
@@ -42,7 +53,7 @@ class test_hdlc_framer(gr_unittest.TestCase):
         rxmsg = debug.get_message(0)
         result_len = pmt.blob_length(pmt.cdr(rxmsg))
         msg_data = []
-        for j in range(result_len):
+        for j in xrange(result_len):
             msg_data.append(pmt.u8vector_ref(pmt.cdr(rxmsg), j))
         self.assertEqual(src_data, msg_data)
 

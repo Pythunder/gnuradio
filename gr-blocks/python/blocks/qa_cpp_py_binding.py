@@ -1,19 +1,31 @@
 #!/usr/bin/env python
 #
-# Copyright 2012,2013,2015 Free Software Foundation, Inc.
+# Copyright 2012,2013 Free Software Foundation, Inc.
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
 #
 
-#
+# 
 # This program tests mixed python and c++ ctrlport exports in a single app
 #
 
-
-import sys, time, random, numpy, re
+import Ice
+import sys, time, random, numpy
 from gnuradio import gr, gr_unittest, blocks
 
 from gnuradio.ctrlport import GNURadio
@@ -26,7 +38,7 @@ def get1():
 def get2():
     return "failure"
 
-class inc_class(object):
+class inc_class:
     def __init__(self):
         self.val = 1
     def pp(self):
@@ -114,13 +126,13 @@ class test_cpp_py_binding(gr_unittest.TestCase):
         val = get5()
         rval = v5.get()
         self.assertComplexTuplesAlmostEqual(val, rval, 5)
-
+        
         val = get6()
         rval = v6.get()
         self.assertComplexTuplesAlmostEqual(val, rval, 5)
 
     def test_002(self):
-        data = list(range(1,9))
+        data = range(1,9)
 
         self.src = blocks.vector_source_c(data)
         self.p1 = blocks.ctrlport_probe_c("aaa","C++ exported variable")
@@ -133,25 +145,23 @@ class test_cpp_py_binding(gr_unittest.TestCase):
 
         # Probes return complex values as list of floats with re, im
         # Imaginary parts of this data set are 0.
-        expected_result = [1, 2, 3, 4,
-                           5, 6, 7, 8]
+        expected_result = [1, 0, 2, 0, 3, 0, 4, 0,
+                           5, 0, 6, 0, 7, 0, 8, 0]
 
         # Make sure we have time for flowgraph to run
         time.sleep(0.1)
 
         # Get available endpoint
         ep = gr.rpcmanager_get().endpoints()[0]
-        hostname = re.search(r"-h (\S+|\d+\.\d+\.\d+\.\d+)", ep).group(1)
-        portnum = re.search(r"-p (\d+)", ep).group(1)
 
-        # Initialize a simple ControlPort client from endpoint
-        from gnuradio.ctrlport.GNURadioControlPortClient import GNURadioControlPortClient
-        radiosys = GNURadioControlPortClient(hostname, portnum, rpcmethod='thrift')
-        radio = radiosys.client
+        # Initialize a simple Ice client from endpoint
+        ic = Ice.initialize(sys.argv)
+        base = ic.stringToProxy(ep)
+        radio = GNURadio.ControlPortPrx.checkedCast(base)
 
         # Get all exported knobs
-        ret = radio.getKnobs([probe_name + "::bbb"])
-        for name in list(ret.keys()):
+        ret = radio.get([probe_name + "::bbb"])
+        for name in ret.keys():
             result = ret[name].value
             self.assertEqual(result, expected_result)
 
@@ -159,3 +169,4 @@ class test_cpp_py_binding(gr_unittest.TestCase):
 
 if __name__ == '__main__':
     gr_unittest.run(test_cpp_py_binding, "test_cpp_py_binding.xml")
+

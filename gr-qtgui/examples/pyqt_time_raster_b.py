@@ -1,15 +1,25 @@
 #!/usr/bin/env python
 #
-# Copyright 2012,2013,2015 Free Software Foundation, Inc.
+# Copyright 2012,2013 Free Software Foundation, Inc.
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
 #
 
-from __future__ import print_function
-from __future__ import unicode_literals
 from gnuradio import gr
 from gnuradio import blocks
 from gnuradio import blocks
@@ -17,18 +27,18 @@ import sys
 
 try:
     from gnuradio import qtgui
-    from PyQt5 import QtWidgets, Qt
+    from PyQt4 import QtGui, QtCore
     import sip
 except ImportError:
-    print("Error: Program requires PyQt5 and gr-qtgui.")
+    print "Error: Program requires PyQt4 and gr-qtgui."
     sys.exit(1)
 
-class dialog_box(QtWidgets.QWidget):
+class dialog_box(QtGui.QWidget):
     def __init__(self, display):
-        QtWidgets.QWidget.__init__(self, None)
+        QtGui.QWidget.__init__(self, None)
         self.setWindowTitle('PyQt Test GUI')
 
-        self.boxlayout = QtWidgets.QBoxLayout(QtWidgets.QBoxLayout.LeftToRight, self)
+        self.boxlayout = QtGui.QBoxLayout(QtGui.QBoxLayout.LeftToRight, self)
         self.boxlayout.addWidget(display, 1)
 
         self.resize(800, 500)
@@ -37,7 +47,7 @@ class my_top_block(gr.top_block):
     def __init__(self):
         gr.top_block.__init__(self)
 
-        self.qapp = QtWidgets.QApplication(sys.argv)
+        self.qapp = QtGui.QApplication(sys.argv)
 
         data0  = 10*[0,] + 40*[1,0] + 10*[0,]
         data0 += 10*[0,] + 40*[0,1] + 10*[0,]
@@ -63,8 +73,8 @@ class my_top_block(gr.top_block):
         pyQt = self.snk1.pyqwidget()
 
         # Wrap the pointer as a PyQt SIP object
-        # This can now be manipulated as a PyQt5.QtWidgets.QWidget
-        pyWin = sip.wrapinstance(pyQt, QtWidgets.QWidget)
+        # This can now be manipulated as a PyQt4.QtGui.QWidget
+        pyWin = sip.wrapinstance(pyQt, QtGui.QWidget)
 
         self.main_box = dialog_box(pyWin)
         self.main_box.show()
@@ -74,3 +84,4 @@ if __name__ == "__main__":
     tb.start()
     tb.qapp.exec_()
     tb.stop()
+

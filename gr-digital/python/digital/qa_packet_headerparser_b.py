@@ -3,10 +3,21 @@
 # 
 # This file is part of GNU Radio
 # 
-# SPDX-License-Identifier: GPL-3.0-or-later
-#
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 # 
-
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
+# 
 
 import time
 import random
@@ -18,7 +29,6 @@ import pmt
 class qa_packet_headerparser_b (gr_unittest.TestCase):
 
     def setUp (self):
-        random.seed(0)
         self.tb = gr.top_block ()
 
     def tearDown (self):
@@ -67,7 +77,7 @@ class qa_packet_headerparser_b (gr_unittest.TestCase):
         header_len = 32
         packet_len_tagname = "packet_len"
         packet_lengths = [random.randint(1, 100) for x in range(N)]
-        data, tags = tagged_streams.packets_to_vectors([list(range(packet_lengths[i])) for i in range(N)], packet_len_tagname)
+        data, tags = tagged_streams.packets_to_vectors([range(packet_lengths[i]) for i in range(N)], packet_len_tagname)
         src = blocks.vector_source_b(data, False, 1, tags)
         header_gen = digital.packet_headergenerator_bb(header_len, packet_len_tagname)
         header_parser = digital.packet_headerparser_b(header_len, packet_len_tagname)
@@ -79,7 +89,7 @@ class qa_packet_headerparser_b (gr_unittest.TestCase):
         self.tb.stop()
         self.tb.wait()
         self.assertEqual(sink.num_messages(), N)
-        for i in range(N):
+        for i in xrange(N):
             msg = pmt.to_python(sink.get_message(i))
             self.assertEqual(msg, {'packet_len': packet_lengths[i], 'packet_num': i})
 
@@ -87,9 +97,6 @@ class qa_packet_headerparser_b (gr_unittest.TestCase):
         """ Header 1: 193 bytes
         Header 2: 8 bytes
         2 bits per complex symbol, 32 carriers => 64 bits = 8 bytes per OFDM symbol
-                                    4 carriers =>  8 bits = 1 byte  per OFDM symbol
-                                    8 carriers => 16 bits = 2 bytes per OFDM symbol
-        Means we need 52 carriers to store the 193 bytes.
         """
         encoded_headers = (
             #   | Number of bytes                    | Packet number                      | CRC
@@ -100,7 +107,7 @@ class qa_packet_headerparser_b (gr_unittest.TestCase):
         frame_len_tagname = "frame_len"
         src = blocks.vector_source_b(encoded_headers)
         header_formatter = digital.packet_header_ofdm(
-                (list(range(32)),list(range(4)),list(range(8))), # 32/4/8 carriers are occupied (which doesn't matter here)
+                (range(32),), # 32 carriers are occupied (which doesn't matter here)
                 1,         # 1 OFDM symbol per header (= 32 bits)
                 packet_len_tagname,
                 frame_len_tagname,
@@ -120,7 +127,7 @@ class qa_packet_headerparser_b (gr_unittest.TestCase):
         msg1 = pmt.to_python(sink.get_message(0))
         msg2 = pmt.to_python(sink.get_message(1))
         # Multiply with 4 because unpacked bytes have only two bits
-        self.assertEqual(msg1, {'packet_len': 193*4, 'frame_len': 52, 'packet_num': 0})
+        self.assertEqual(msg1, {'packet_len': 193*4, 'frame_len': 25, 'packet_num': 0})
         self.assertEqual(msg2, {'packet_len': 8*4, 'frame_len': 1, 'packet_num': 1})
 
     def test_004_ofdm_scramble(self):
@@ -131,10 +138,10 @@ class qa_packet_headerparser_b (gr_unittest.TestCase):
         packet_length = 23
         packet_len_tagname = "packet_len"
         frame_len_tagname = "frame_len"
-        data, tags = tagged_streams.packets_to_vectors([list(range(packet_length)),list(range(packet_length)),], packet_len_tagname)
+        data, tags = tagged_streams.packets_to_vectors([range(packet_length),range(packet_length),], packet_len_tagname)
         src = blocks.vector_source_b(data, False, 1, tags)
         header_formatter = digital.packet_header_ofdm(
-                (list(range(32)),), # 32 carriers are occupied (which doesn't matter here)
+                (range(32),), # 32 carriers are occupied (which doesn't matter here)
                 1,         # 1 OFDM symbol per header (= 32 bits)
                 packet_len_tagname,
                 frame_len_tagname,

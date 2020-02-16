@@ -1,18 +1,26 @@
 #!/usr/bin/env python
 #
 # Copyright 2010,2011 Free Software Foundation, Inc.
-#
+# 
 # This file is part of GNU Radio
-#
-# SPDX-License-Identifier: GPL-3.0-or-later
-#
-#
+# 
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
+# 
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
+# 
 
-from __future__ import print_function
-from __future__ import division
-from __future__ import unicode_literals
-
-from gnuradio import gr, channels
+from gnuradio import gr, filter
 from gnuradio import blocks
 from gnuradio import eng_notation
 from gnuradio.eng_option import eng_option
@@ -24,29 +32,29 @@ class my_top_block(gr.top_block):
     def __init__(self, ifile, ofile, options):
         gr.top_block.__init__(self)
 
-        SNR = 10.0**(options.snr / 10.0)
+        SNR = 10.0**(options.snr/10.0)
         time_offset = options.time_offset
-        phase_offset = options.phase_offset*(math.pi / 180.0)
+        phase_offset = options.phase_offset*(math.pi/180.0)
 
         # calculate noise voltage from SNR
         power_in_signal = abs(options.tx_amplitude)**2
-        noise_power = power_in_signal / SNR
+        noise_power = power_in_signal/SNR
         noise_voltage = math.sqrt(noise_power)
-        print("Noise voltage: ", noise_voltage)
+        print "Noise voltage: ", noise_voltage
 
         frequency_offset = options.frequency_offset / options.fft_length
 
         self.src = blocks.file_source(gr.sizeof_gr_complex, ifile)
         #self.throttle = blocks.throttle(gr.sizeof_gr_complex, options.sample_rate)
 
-        self.channel = channels.channel_model(noise_voltage, frequency_offset,
+        self.channel = filter.channel_model(noise_voltage, frequency_offset,
                                         time_offset, noise_seed=-random.randint(0,100000))
         self.phase = blocks.multiply_const_cc(complex(math.cos(phase_offset),
                                                   math.sin(phase_offset)))
         self.snk = blocks.file_sink(gr.sizeof_gr_complex, ofile)
 
         self.connect(self.src, self.channel, self.phase, self.snk)
-
+        
 
 # /////////////////////////////////////////////////////////////////////////////
 #                                   main
@@ -86,13 +94,13 @@ def main():
 
     ifile = args[0]
     ofile = args[1]
-
+        
     # build the graph
     tb = my_top_block(ifile, ofile, options)
 
     r = gr.enable_realtime_scheduling()
     if r != gr.RT_OK:
-        print("Warning: Failed to enable realtime scheduling.")
+        print "Warning: Failed to enable realtime scheduling."
 
     tb.start()        # start flow graph
     tb.wait()         # wait for it to finish

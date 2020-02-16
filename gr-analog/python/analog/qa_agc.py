@@ -4,10 +4,21 @@
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 #
-
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
+#
 
 from gnuradio import gr, gr_unittest, analog, blocks
 
@@ -22,10 +33,10 @@ class test_agc(gr_unittest.TestCase):
     def test_001_sets(self):
         agc = analog.agc_cc(1e-3, 1, 1)
 
-        agc.set_rate(1)
-        agc.set_reference(1.1)
-        agc.set_gain(1.1)
-        agc.set_max_gain(100)
+	agc.set_rate(1)
+	agc.set_reference(1.1)
+	agc.set_gain(1.1)
+	agc.set_max_gain(100)
 
         self.assertAlmostEqual(agc.rate(), 1)
         self.assertAlmostEqual(agc.reference(), 1.1)
@@ -107,10 +118,10 @@ class test_agc(gr_unittest.TestCase):
     def test_002_sets(self):
         agc = analog.agc_ff(1e-3, 1, 1)
 
-        agc.set_rate(1)
-        agc.set_reference(1.1)
-        agc.set_gain(1.1)
-        agc.set_max_gain(100)
+	agc.set_rate(1)
+	agc.set_reference(1.1)
+	agc.set_gain(1.1)
+	agc.set_max_gain(100)
 
         self.assertAlmostEqual(agc.rate(), 1)
         self.assertAlmostEqual(agc.reference(), 1.1)
@@ -192,11 +203,11 @@ class test_agc(gr_unittest.TestCase):
     def test_003_sets(self):
         agc = analog.agc2_cc(1e-3, 1e-1, 1, 1)
 
-        agc.set_attack_rate(1)
-        agc.set_decay_rate(2)
-        agc.set_reference(1.1)
-        agc.set_gain(1.1)
-        agc.set_max_gain(100)
+	agc.set_attack_rate(1)
+	agc.set_decay_rate(2)
+	agc.set_reference(1.1)
+	agc.set_gain(1.1)
+	agc.set_max_gain(100)
 
         self.assertAlmostEqual(agc.attack_rate(), 1)
         self.assertAlmostEqual(agc.decay_rate(), 2)
@@ -279,11 +290,11 @@ class test_agc(gr_unittest.TestCase):
     def test_004_sets(self):
         agc = analog.agc2_ff(1e-3, 1e-1, 1, 1)
 
-        agc.set_attack_rate(1)
-        agc.set_decay_rate(2)
-        agc.set_reference(1.1)
-        agc.set_gain(1.1)
-        agc.set_max_gain(100)
+	agc.set_attack_rate(1)
+	agc.set_decay_rate(2)
+	agc.set_reference(1.1)
+	agc.set_gain(1.1)
+	agc.set_max_gain(100)
 
         self.assertAlmostEqual(agc.attack_rate(), 1)
         self.assertAlmostEqual(agc.decay_rate(), 2)
@@ -439,10 +450,10 @@ class test_agc(gr_unittest.TestCase):
     def test_006_sets(self):
         agc = analog.agc3_cc(1e-3, 1e-1, 1)
 
-        agc.set_attack_rate(1)
-        agc.set_decay_rate(2)
-        agc.set_reference(1.1)
-        agc.set_gain(1.1)
+	agc.set_attack_rate(1)
+	agc.set_decay_rate(2)
+	agc.set_reference(1.1)
+	agc.set_gain(1.1)
 
         self.assertAlmostEqual(agc.attack_rate(), 1)
         self.assertAlmostEqual(agc.decay_rate(), 2)
@@ -470,7 +481,7 @@ class test_agc(gr_unittest.TestCase):
         tb.run()
         dst_data = dst1.data()
         M = 100
-        result = [abs(x) for x in dst_data[N-M:]]
+        result = map(lambda x: abs(x), dst_data[N-M:])
         self.assertFloatTuplesAlmostEqual(result, M*[ref,], 4)
 
     def test_100(self):
@@ -478,7 +489,7 @@ class test_agc(gr_unittest.TestCase):
 
         length = 8
         gain = 2
-
+        
         input_data = 8*(0.0,) + 24*(1.0,) + 24*(0.0,)
         expected_result = (8+length-1)*(0.0,) + 24*(gain*1.0,) + (0,)
 

@@ -4,18 +4,25 @@
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 #
-
-from __future__ import division
-from __future__ import unicode_literals
-
-import math
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
+#
 
 from gnuradio import gr, blocks
-from . import fec_swig as fec
-
+import fec_swig as fec
+import math
 
 class capillary_threaded_encoder(gr.hier_block2):
     def __init__(self, encoder_list_0, input_size=gr.sizeof_char, output_size=gr.sizeof_char):
@@ -36,7 +43,7 @@ class capillary_threaded_encoder(gr.hier_block2):
                 self.deinterleaves_0.append(blocks.deinterleave(input_size,
                                                                 fec.get_encoder_input_size(encoder_list_0[0])))
 
-        self.generic_encoders_0 = [];
+       	self.generic_encoders_0 = [];
         for i in range(len(encoder_list_0)):
             self.generic_encoders_0.append(fec.encoder(encoder_list_0[i],
                                                        input_size, output_size))
@@ -57,7 +64,7 @@ class capillary_threaded_encoder(gr.hier_block2):
                 branchcount += 2;
 
         codercount = 0;
-        for i in range(len(encoder_list_0) // 2):
+        for i in range(len(encoder_list_0)/2):
             self.connect((self.deinterleaves_0[rootcount], 0), (self.generic_encoders_0[codercount], 0))
             self.connect((self.deinterleaves_0[rootcount], 1), (self.generic_encoders_0[codercount + 1], 0))
             rootcount += 1;
@@ -75,13 +82,13 @@ class capillary_threaded_encoder(gr.hier_block2):
 
 
         codercount = 0;
-        for i in range(len(encoder_list_0) // 2):
+        for i in range(len(encoder_list_0)/2):
             self.connect((self.generic_encoders_0[codercount], 0), (self.interleaves_0[rootcount], 0))
             self.connect((self.generic_encoders_0[codercount + 1], 0), (self.interleaves_0[rootcount], 1))
             rootcount += 1;
             codercount += 2;
 
-        if((len(self.encoder_list_0)) > 1):
+       	if((len(self.encoder_list_0)) > 1):
             self.connect((self, 0), (self.deinterleaves_0[0], 0))
             self.connect((self.interleaves_0[0], 0), (self, 0))
         else:

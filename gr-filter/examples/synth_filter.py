@@ -4,18 +4,26 @@
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
 #
 
-from __future__ import print_function
-from __future__ import division
-from __future__ import unicode_literals
 from gnuradio import gr
 from gnuradio import filter
 from gnuradio import blocks
 import sys
-import numpy
 
 try:
     from gnuradio import analog
@@ -24,7 +32,13 @@ except ImportError:
     sys.exit(1)
 
 try:
-    from matplotlib import pyplot
+    import scipy
+except ImportError:
+    sys.stderr.write("Error: Program requires scipy (see: www.scipy.org).\n")
+    sys.exit(1)
+
+try:
+    import pylab
 except ImportError:
     sys.stderr.write("Error: Program requires matplotlib (see: matplotlib.sourceforge.net).\n")
     sys.exit(1)
@@ -43,8 +57,8 @@ def main():
 
     taps = filter.firdes.low_pass_2(len(freqs), fs,
                                     fs/float(nchans)/2, 100, 100)
-    print("Num. Taps = %d (taps per filter = %d)" % (len(taps),
-                                                     len(taps) / nchans))
+    print "Num. Taps = %d (taps per filter = %d)" % (len(taps),
+                                                     len(taps)/nchans)
     filtbank = filter.pfb_synthesizer_ccf(nchans, taps)
 
     head = blocks.head(gr.sizeof_gr_complex, N)
@@ -59,20 +73,20 @@ def main():
     tb.run()
 
     if 1:
-        f1 = pyplot.figure(1)
+        f1 = pylab.figure(1)
         s1 = f1.add_subplot(1,1,1)
         s1.plot(snk.data()[1000:])
 
         fftlen = 2048
-        f2 = pyplot.figure(2)
+        f2 = pylab.figure(2)
         s2 = f2.add_subplot(1,1,1)
-        winfunc = numpy.blackman
+        winfunc = scipy.blackman
         s2.psd(snk.data()[10000:], NFFT=fftlen,
                Fs = nchans*fs,
-               noverlap=fftlen / 4,
+               noverlap=fftlen/4,
                window = lambda d: d*winfunc(fftlen))
 
-        pyplot.show()
+        pylab.show()
 
 if __name__ == "__main__":
     main()

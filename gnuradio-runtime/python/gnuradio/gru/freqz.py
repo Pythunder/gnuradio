@@ -4,8 +4,20 @@
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
 #
 
 # This code lifted from various parts of www.scipy.org -eb 2005-01-24
@@ -40,8 +52,6 @@
 # DAMAGE.
 #
 
-from __future__ import division
-from __future__ import unicode_literals
 __all__ = ['freqz']
 
 import numpy
@@ -91,12 +101,12 @@ def polyval(p,x):
         y = 0
     else:
         x = asarray(x)
-        y = numpy.zeros(x.shape,x.dtype)
+        y = numpy.zeros(x.shape,x.typecode())
     for i in range(len(p)):
         y = x * y + p[i]
     return y
 
-class poly1d(object):
+class poly1d:
     """A one-dimensional polynomial class.
 
     p = poly1d([1,2,3]) constructs the polynomial x**2 + 2 x + 3
@@ -108,21 +118,21 @@ class poly1d(object):
     p[k] is the coefficient on the kth power of x (backwards from
          sequencing the coefficient array.
 
-    polynomials can be added, subtracted, multiplied and divided (returns
+    polynomials can be added, substracted, multplied and divided (returns
          quotient and remainder).
     asarray(p) will also give the coefficient array, so polynomials can
          be used in all functions that accept arrays.
     """
     def __init__(self, c_or_r, r=0):
         if isinstance(c_or_r,poly1d):
-            for key in list(c_or_r.__dict__.keys()):
+            for key in c_or_r.__dict__.keys():
                 self.__dict__[key] = c_or_r.__dict__[key]
             return
         if r:
             c_or_r = poly(c_or_r)
         c_or_r = atleast_1d(c_or_r)
         if len(c_or_r.shape) > 1:
-            raise ValueError("Polynomial must be 1d only.")
+            raise ValueError, "Polynomial must be 1d only."
         c_or_r = trim_zeros(c_or_r, trim='f')
         if len(c_or_r) == 0:
             c_or_r = numpy.array([0])
@@ -217,7 +227,7 @@ class poly1d(object):
 
     def __pow__(self, val):
         if not isscalar(val) or int(val) != val or val < 0:
-            raise ValueError("Power to non-negative integers only.")
+            raise ValueError, "Power to non-negative integers only."
         res = [1]
         for k in range(val):
             res = polymul(self.coeffs, res)
@@ -233,20 +243,20 @@ class poly1d(object):
 
     def __div__(self, other):
         if isscalar(other):
-            return poly1d(self.coeffs / other)
+            return poly1d(self.coeffs/other)
         else:
             other = poly1d(other)
-            return list(map(poly1d,polydiv(self.coeffs, other.coeffs)))
+            return map(poly1d,polydiv(self.coeffs, other.coeffs))
 
     def __rdiv__(self, other):
         if isscalar(other):
-            return poly1d(other / self.coeffs)
+            return poly1d(other/self.coeffs)
         else:
             other = poly1d(other)
-            return list(map(poly1d,polydiv(other.coeffs, self.coeffs)))
+            return map(poly1d,polydiv(other.coeffs, self.coeffs))
 
     def __setattr__(self, key, val):
-        raise ValueError("Attributes cannot be changed this way.")
+        raise ValueError, "Attributes cannot be changed this way."
 
     def __getattr__(self, key):
         if key in ['r','roots']:
@@ -269,7 +279,7 @@ class poly1d(object):
     def __setitem__(self, key, val):
         ind = self.order - key
         if key < 0:
-            raise ValueError("Does not support negative powers.")
+            raise ValueError, "Does not support negative powers."
         if key > self.order:
             zr = numpy.zeros(key-self.order,self.coeffs.typecode())
             self.__dict__['coeffs'] = numpy.concatenate((zr,self.coeffs))
@@ -313,22 +323,22 @@ def freqz(b, a, worN=None, whole=0, plot=None):
        h -- The frequency response.
        w -- The frequencies at which h was computed.
     """
-    b, a = list(map(atleast_1d, (b,a)))
+    b, a = map(atleast_1d, (b,a))
     if whole:
         lastpoint = 2*pi
     else:
         lastpoint = pi
     if worN is None:
         N = 512
-        w = Num.arange(0,lastpoint,lastpoint / N)
-    elif isinstance(worN, int):
+        w = Num.arange(0,lastpoint,lastpoint/N)
+    elif isinstance(worN, types.IntType):
         N = worN
-        w = Num.arange(0,lastpoint,lastpoint / N)
+        w = Num.arange(0,lastpoint,lastpoint/N)
     else:
         w = worN
     w = atleast_1d(w)
     zm1 = exp(-1j*w)
-    h = polyval(b[::-1] / zm1, polyval(a[::-1], zm1))
+    h = polyval(b[::-1], zm1) / polyval(a[::-1], zm1)
     # if not plot is None:
     #    plot(w, h)
     return h, w

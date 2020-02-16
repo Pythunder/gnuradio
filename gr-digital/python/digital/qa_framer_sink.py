@@ -4,10 +4,21 @@
 # 
 # This file is part of GNU Radio
 # 
-# SPDX-License-Identifier: GPL-3.0-or-later
-#
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 # 
-
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
+# 
 
 from gnuradio import gr, gr_unittest, digital, blocks
 
@@ -23,7 +34,7 @@ def string_to_1_0_list(s):
     return r
 
 def to_1_0_string(L):
-    return ''.join([chr(x + ord('0')) for x in L])
+    return ''.join(map(lambda x: chr(x + ord('0')), L))
 
 class test_framker_sink(gr_unittest.TestCase):
 
@@ -40,7 +51,7 @@ class test_framker_sink(gr_unittest.TestCase):
         header = tuple(2*[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]) # len=1
         pad = (0,) * 100
         src_data = code + header + (0,1,0,0,0,0,0,1) + pad
-        expected_data = b'A'
+        expected_data = 'A'
 
         rcvd_pktq = gr.msg_queue()
 
@@ -64,7 +75,7 @@ class test_framker_sink(gr_unittest.TestCase):
         header = tuple(2*[0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0]) # len=2
         pad = (0,) * 100
         src_data = code + header + (0,1,0,0,1,0,0,0) + (0,1,0,0,1,0,0,1) + pad
-        expected_data = b'HI'
+        expected_data = 'HI'
 
         rcvd_pktq = gr.msg_queue()
 

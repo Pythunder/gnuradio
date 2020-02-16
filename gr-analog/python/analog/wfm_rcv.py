@@ -3,21 +3,30 @@
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 #
-
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import unicode_literals
-
-import math
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
+#
 
 from gnuradio import gr, filter
+from fm_emph import fm_deemph
+import math
 
-from . import analog_swig as analog
-from .fm_emph import fm_deemph
-
+try:
+    from gnuradio import analog
+except ImportError:
+    import analog_swig as analog
 
 class wfm_rcv(gr.hier_block2):
     def __init__ (self, quad_rate, audio_decimation):
@@ -31,14 +40,14 @@ class wfm_rcv(gr.hier_block2):
             quad_rate: input sample rate of complex baseband input. (float)
             audio_decimation: how much to decimate quad_rate to get to audio. (integer)
         """
-        gr.hier_block2.__init__(self, "wfm_rcv",
-                                gr.io_signature(1, 1, gr.sizeof_gr_complex), # Input signature
-                                gr.io_signature(1, 1, gr.sizeof_float))      # Output signature
+	gr.hier_block2.__init__(self, "wfm_rcv",
+				gr.io_signature(1, 1, gr.sizeof_gr_complex), # Input signature
+				gr.io_signature(1, 1, gr.sizeof_float))      # Output signature
 
         volume = 20.
 
         max_dev = 75e3
-        fm_demod_gain = quad_rate / (2*math.pi*max_dev)
+        fm_demod_gain = quad_rate/(2*math.pi*max_dev)
         audio_rate = quad_rate / audio_decimation
 
 
@@ -55,7 +64,7 @@ class wfm_rcv(gr.hier_block2):
         width_of_transition_band = audio_rate / 32
         audio_coeffs = filter.firdes.low_pass(1.0,            # gain
                                               quad_rate,      # sampling rate
-                                              audio_rate / 2 - width_of_transition_band,
+                                              audio_rate/2 - width_of_transition_band,
                                               width_of_transition_band,
                                               filter.firdes.WIN_HAMMING)
         # input: float; output: float

@@ -2,8 +2,20 @@
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
 
 include(GrPython)
 
@@ -14,6 +26,7 @@ GR_PYTHON_INSTALL(FILES
     __init__.py
     pmt_to_python.py
     DESTINATION ${GR_PYTHON_DIR}/pmt
+    COMPONENT "runtime_python"
 )
 
 ########################################################################
@@ -27,9 +40,8 @@ foreach(py_qa_test_file ${py_qa_test_files})
     set(GR_TEST_PYTHON_DIRS
         ${CMAKE_BINARY_DIR}/gnuradio-runtime/python
         ${CMAKE_BINARY_DIR}/gnuradio-runtime/swig
-        ${CMAKE_BINARY_DIR}/gnuradio-blocks/swig		
     )
     set(GR_TEST_TARGET_DEPS gnuradio-runtime)
-    GR_ADD_TEST(${py_qa_test_name} ${QA_PYTHON_EXECUTABLE} -B ${py_qa_test_file})
+    GR_ADD_TEST(${py_qa_test_name} ${QA_PYTHON_EXECUTABLE} ${PYTHON_DASH_B} ${py_qa_test_file})
 endforeach(py_qa_test_file)
 endif(ENABLE_TESTING)

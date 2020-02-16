@@ -4,37 +4,45 @@
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 #
-
-from __future__ import print_function
-from __future__ import division
-from __future__ import unicode_literals
-
-import numpy
-from numpy.fft import fftpack
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
+#
 
 try:
-    from pylab import Button, connect, draw, figure, figtext, get_current_fig_manager, show, rcParams, ceil
+    import scipy
+    from scipy import fftpack
 except ImportError:
-    print("Please install Python Matplotlib (http://matplotlib.sourceforge.net/) and Python TkInter https://wiki.python.org/moin/TkInter to run this script")
-    raise SystemExit(1)
+    print "Please install SciPy to run this script (http://www.scipy.org/)"
+    raise SystemExit, 1
 
-from argparse import ArgumentParser
-from gnuradio.plot_data import datatype_lookup
+try:
+    from pylab import *
+except ImportError:
+    print "Please install Matplotlib to run this script (http://matplotlib.sourceforge.net/)"
+    raise SystemExit, 1
 
+from optparse import OptionParser
 
-class plot_fft_base(object):
+class plot_fft_base:
     def __init__(self, datatype, filename, options):
         self.hfile = open(filename, "r")
         self.block_length = options.block
         self.start = options.start
         self.sample_rate = options.sample_rate
 
-        self.datatype = datatype
-        if self.datatype is None:
-            self.datatype = datatype_lookup[options.data_type]
+        self.datatype = getattr(scipy, datatype)
         self.sizeof_data = self.datatype().nbytes    # number of bytes per sample in file
 
         self.axis_font_size = 16
@@ -71,33 +79,33 @@ class plot_fft_base(object):
         show()
 
     def get_data(self):
-        self.position = self.hfile.tell() / self.sizeof_data
+        self.position = self.hfile.tell()/self.sizeof_data
         self.text_file_pos.set_text("File Position: %d" % (self.position))
         try:
-            self.iq = numpy.fromfile(self.hfile, dtype=self.datatype, count=self.block_length)
+            self.iq = scipy.fromfile(self.hfile, dtype=self.datatype, count=self.block_length)
         except MemoryError:
-            print("End of File")
+            print "End of File"
         else:
             self.iq_fft = self.dofft(self.iq)
 
             tstep = 1.0 / self.sample_rate
-            #self.time = numpy.array([tstep*(self.position + i) for i in range(len(self.iq))])
-            self.time = numpy.array([tstep*(i) for i in range(len(self.iq))])
+            #self.time = scipy.array([tstep*(self.position + i) for i in xrange(len(self.iq))])
+            self.time = scipy.array([tstep*(i) for i in xrange(len(self.iq))])
 
             self.freq = self.calc_freq(self.time, self.sample_rate)
 
     def dofft(self, iq):
         N = len(iq)
-        iq_fft = numpy.fft.fftshift(fftpack.fft(iq))       # fft and shift axis
-        iq_fft = 20*numpy.log10(abs((iq_fft+1e-15) / N)) # convert to decibels, adjust power
+        iq_fft = scipy.fftpack.fftshift(scipy.fft(iq))       # fft and shift axis
+        iq_fft = 20*scipy.log10(abs((iq_fft+1e-15)/N)) # convert to decibels, adjust power
         # adding 1e-15 (-300 dB) to protect against value errors if an item in iq_fft is 0
         return iq_fft
 
     def calc_freq(self, time, sample_rate):
         N = len(time)
-        Fs = 1.0 / (max(time) - min(time))
+        Fs = 1.0 / (time.max() - time.min())
         Fn = 0.5 * sample_rate
-        freq = numpy.array([-Fn + i*Fs for i in range(N)])
+        freq = scipy.array([-Fn + i*Fs for i in xrange(N)])
         return freq
 
     def make_plots(self):
@@ -149,8 +157,8 @@ class plot_fft_base(object):
         draw()
 
     def zoom(self, event):
-        newxlim = numpy.array(self.sp_iq.get_xlim())
-        curxlim = numpy.array(self.xlim)
+        newxlim = scipy.array(self.sp_iq.get_xlim())
+        curxlim = scipy.array(self.xlim)
         if(newxlim[0] != curxlim[0] or newxlim[1] != curxlim[1]):
             self.xlim = newxlim
             #xmin = max(0, int(ceil(self.sample_rate*(self.xlim[0] - self.position))))
@@ -201,37 +209,41 @@ class plot_fft_base(object):
 
     @staticmethod
     def setup_options():
+        usage="%prog: [options] input_filename"
         description = "Takes a GNU Radio complex binary file and displays the I&Q data versus time as well as the frequency domain (FFT) plot. The y-axis values are plotted assuming volts as the amplitude of the I&Q streams and converted into dBm in the frequency domain (the 1/N power adjustment out of the FFT is performed internally). The script plots a certain block of data at a time, specified on the command line as -B or --block. This value defaults to 1000. The start position in the file can be set by specifying -s or --start and defaults to 0 (the start of the file). By default, the system assumes a sample rate of 1, so in time, each sample is plotted versus the sample number. To set a true time and frequency axis, set the sample rate (-R or --sample-rate) to the sample rate used when capturing the samples."
 
-        parser = ArgumentParser(conflict_handler="resolve", description=description)
-        parser.add_argument("-d", "--data-type", default="complex64",
-                choices=("complex64", "float32", "uint32", "int32", "uint16",
-                    "int16", "uint8", "int8"),
-                help="Specify the data type [default=%(default)r]")
-        parser.add_argument("-B", "--block", type=int, default=1000,
-                help="Specify the block size [default=%(default)r]")
-        parser.add_argument("-s", "--start", type=int, default=0,
-                help="Specify where to start in the file [default=%(default)r]")
-        parser.add_argument("-R", "--sample-rate", type=float, default=1.0,
-                help="Set the sampler rate of the data [default=%(default)r]")
-        parser.add_argument("file", metavar="FILE",
-                help="Input file with samples")
+        parser = OptionParser(conflict_handler="resolve", usage=usage, description=description)
+        parser.add_option("-d", "--data-type", type="string", default="complex64",
+                          help="Specify the data type (complex64, float32, (u)int32, (u)int16, (u)int8) [default=%default]")
+        parser.add_option("-B", "--block", type="int", default=1000,
+                          help="Specify the block size [default=%default]")
+        parser.add_option("-s", "--start", type="int", default=0,
+                          help="Specify where to start in the file [default=%default]")
+        parser.add_option("-R", "--sample-rate", type="float", default=1.0,
+                          help="Set the sampler rate of the data [default=%default]")
         return parser
 
 def find(item_in, list_search):
     try:
-        return list_search.index(item_in) != None
+	return list_search.index(item_in) != None
     except ValueError:
-        return False
+	return False
 
 def main():
     parser = plot_fft_base.setup_options()
-    args = parser.parse_args()
+    (options, args) = parser.parse_args ()
+    if len(args) != 1:
+        parser.print_help()
+        raise SystemExit, 1
+    filename = args[0]
 
-    plot_fft_base(None, args.file, args)
+    dc = plot_fft_base(options.data_type, filename, options)
 
 if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
         pass
+
+
+

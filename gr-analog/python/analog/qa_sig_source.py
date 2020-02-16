@@ -4,14 +4,24 @@
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 #
-
-from __future__ import division
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
+#
 
 import math
-import pmt
+
 from gnuradio import gr, gr_unittest, analog, blocks
 
 class test_sig_source(gr_unittest.TestCase):
@@ -46,18 +56,6 @@ class test_sig_source(gr_unittest.TestCase):
         dst_data = dst1.data()
         self.assertEqual(expected_result, dst_data)
 
-    def test_const_b(self):
-        tb = self.tb
-        expected_result = (1, 1, 1, 1)
-        src1 = analog.sig_source_b(1e6, analog.GR_CONST_WAVE, 0, 1)
-        op = blocks.head(gr.sizeof_char, 4)
-        dst1 = blocks.vector_sink_b()
-        tb.connect(src1, op)
-        tb.connect(op, dst1)
-        tb.run()
-        dst_data = dst1.data()
-        self.assertEqual(expected_result, dst_data)
-
     def test_sine_f(self):
         tb = self.tb
         sqrt2 = math.sqrt(2) / 2
@@ -71,24 +69,6 @@ class test_sig_source(gr_unittest.TestCase):
         dst_data = dst1.data()
         self.assertFloatTuplesAlmostEqual(expected_result, dst_data, 5)
 
-
-    def test_sine_b(self):
-        tb = self.tb
-        sqrt2 = math.sqrt(2) / 2
-        temp_result = (0, sqrt2, 1, sqrt2, 0, -sqrt2, -1, -sqrt2, 0)
-        amp = 8
-        expected_result = tuple([int(z * amp) for z in temp_result])
-        src1 = analog.sig_source_b(8, analog.GR_SIN_WAVE, 1.0, amp)
-        op = blocks.head(gr.sizeof_char, 9)
-        dst1 = blocks.vector_sink_b()
-        tb.connect(src1, op)
-        tb.connect(op, dst1)
-        tb.run()
-        dst_data = dst1.data()
-        # Let the python know we are dealing with signed int behind scenes
-        dst_data_signed = [b if b < 127 else (256 - b) * -1 for b in dst_data]
-        self.assertFloatTuplesAlmostEqual(expected_result, dst_data_signed)
-
     def test_cosine_f(self):
         tb = self.tb
         sqrt2 = math.sqrt(2) / 2
@@ -96,20 +76,6 @@ class test_sig_source(gr_unittest.TestCase):
         src1 = analog.sig_source_f(8, analog.GR_COS_WAVE, 1.0, 1.0)
         op = blocks.head(gr.sizeof_float, 9)
         dst1 = blocks.vector_sink_f()
-        tb.connect(src1, op)
-        tb.connect(op, dst1)
-        tb.run()
-        dst_data = dst1.data()
-        self.assertFloatTuplesAlmostEqual(expected_result, dst_data, 5)
-
-    def test_cosine_c(self):
-        tb = self.tb
-        sqrt2 = math.sqrt(2) / 2
-        sqrt2j = 1j * math.sqrt(2) / 2
-        expected_result = (1, sqrt2 + sqrt2j, 1j, -sqrt2 + sqrt2j, -1, -sqrt2 - sqrt2j, -1j, sqrt2 - sqrt2j, 1)
-        src1 = analog.sig_source_c(8, analog.GR_COS_WAVE, 1.0, 1.0)
-        op = blocks.head(gr.sizeof_gr_complex, 9)
-        dst1 = blocks.vector_sink_c()
         tb.connect(src1, op)
         tb.connect(op, dst1)
         tb.run()
@@ -189,20 +155,6 @@ class test_sig_source(gr_unittest.TestCase):
         tb.run()
         dst_data = dst1.data()
         self.assertFloatTuplesAlmostEqual(expected_result, dst_data, 5)
-
-    def test_freq_msg(self):
-        src = analog.sig_source_c(8, analog.GR_SIN_WAVE, 1.0, 1.0)
-        op = blocks.head(gr.sizeof_gr_complex, 9)
-        snk = blocks.vector_sink_c()
-        self.tb.connect(src, op, snk)
-        self.assertAlmostEqual(src.frequency(), 1.0)
-
-        frequency = 3.0
-        src._post(pmt.to_pmt('freq'), pmt.from_double(frequency))
-        self.tb.run()
-
-        self.assertAlmostEqual(src.frequency(), frequency)
-
 
 if __name__ == '__main__':
     gr_unittest.run(test_sig_source, "test_sig_source.xml")

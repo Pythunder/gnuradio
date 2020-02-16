@@ -1,20 +1,30 @@
-from __future__ import division
-from __future__ import unicode_literals
 #
 # Copyright 2008 Free Software Foundation, Inc.
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
 #
 
 from gnuradio import gr
 from gnuradio import blocks
 import sys, math
 
-from . import fft_swig as fft
-from .fft_swig import window
+import fft_swig as fft
+from fft_swig import window
 
 try:
     from gnuradio import filter
@@ -31,7 +41,7 @@ class _logpwrfft_base(gr.hier_block2):
         """
         Create an log10(abs(fft)) stream chain.
         Provide access to the setting the filter and sample rate.
-
+        
         Args:
             sample_rate: Incoming stream sample rate
             fft_size: Number of FFT bins
@@ -53,14 +63,14 @@ class _logpwrfft_base(gr.hier_block2):
         if win is None: win = window.blackmanharris
         fft_window = win(fft_size)
         fft = self._fft_block[0](fft_size, True, fft_window)
-        window_power = sum([x*x for x in fft_window])
+        window_power = sum(map(lambda x: x*x, fft_window))
 
         c2magsq = blocks.complex_to_mag_squared(fft_size)
         self._avg = filter.single_pole_iir_filter_ff(1.0, fft_size)
         self._log = blocks.nlog10_ff(10, fft_size,
                                      -20*math.log10(fft_size)              # Adjust for number of bins
-                                     -10*math.log10(float(window_power) / fft_size) # Adjust for windowing loss
-                                     -20*math.log10(float(ref_scale) / 2))      # Adjust for reference scale
+                                     -10*math.log10(window_power/fft_size) # Adjust for windowing loss
+                                     -20*math.log10(ref_scale/2))      # Adjust for reference scale
         self.connect(self, self._sd, fft, c2magsq, self._avg, self._log, self)
 
         self._average = average
@@ -71,7 +81,7 @@ class _logpwrfft_base(gr.hier_block2):
     def set_decimation(self, decim):
         """
         Set the decimation on stream decimator.
-
+        
         Args:
             decim: the new decimation
         """
@@ -80,7 +90,7 @@ class _logpwrfft_base(gr.hier_block2):
     def set_vec_rate(self, vec_rate):
         """
         Set the vector rate on stream decimator.
-
+        
         Args:
             vec_rate: the new vector rate
         """
@@ -89,7 +99,7 @@ class _logpwrfft_base(gr.hier_block2):
     def set_sample_rate(self, sample_rate):
         """
         Set the new sampling rate
-
+        
         Args:
             sample_rate: the new rate
         """
@@ -98,7 +108,7 @@ class _logpwrfft_base(gr.hier_block2):
     def set_average(self, average):
         """
         Set the averaging filter on/off.
-
+        
         Args:
             average: true to set averaging on
         """
@@ -111,7 +121,7 @@ class _logpwrfft_base(gr.hier_block2):
     def set_avg_alpha(self, avg_alpha):
         """
         Set the average alpha and set the taps if average was on.
-
+        
         Args:
             avg_alpha: the new iir filter tap
         """
@@ -163,3 +173,4 @@ class logpwrfft_c(_logpwrfft_base):
         _name = "logpwrfft_c"
         _item_size = gr.sizeof_gr_complex
         _fft_block = (fft.fft_vcc, )
+

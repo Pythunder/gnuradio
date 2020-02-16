@@ -2,41 +2,49 @@
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
+
+########################################################################
+# Setup the include and linker paths
+########################################################################
+include_directories(
+    ${GR_ZEROMQ_INCLUDE_DIRS}
+    ${GNURADIO_RUNTIME_INCLUDE_DIRS}
+    ${Boost_INCLUDE_DIRS}
+    ${ZEROMQ_INCLUDE_DIRS}
+)
+
+link_directories(${Boost_LIBRARY_DIRS})
+
+if(ENABLE_GR_CTRLPORT)
+  ADD_DEFINITIONS(-DGR_CTRLPORT)
+  include_directories(${ICE_INCLUDE_DIR})
+endif(ENABLE_GR_CTRLPORT)
 
 ########################################################################
 # Setup library
 ########################################################################
-add_library(gnuradio-zeromq
-  base_impl.cc
+list(APPEND zeromq_sources
   pub_sink_impl.cc
-  pub_msg_sink_impl.cc
   sub_source_impl.cc
-  sub_msg_source_impl.cc
   pull_source_impl.cc
-  pull_msg_source_impl.cc
   push_sink_impl.cc
-  push_msg_sink_impl.cc
   rep_sink_impl.cc
-  rep_msg_sink_impl.cc
   req_source_impl.cc
-  req_msg_source_impl.cc
-  tag_headers.cc
-  )
-
-target_link_libraries(gnuradio-zeromq PUBLIC
-  gnuradio-runtime
-  Boost::boost
-  Boost::thread
-  ZeroMQ::ZeroMQ
 )
-
-target_include_directories(gnuradio-zeromq
-  PUBLIC
-  $<INSTALL_INTERFACE:include>
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
-  )
 
 #Add Windows DLL resource file if using MSVC
 if(MSVC)
@@ -47,13 +55,17 @@ if(MSVC)
         ${CMAKE_CURRENT_BINARY_DIR}/gnuradio-zeromq.rc
     @ONLY)
 
-    target_sources(gnuradio-zeromq PRIVATE
+    list(APPEND gr_zeromq_sources
         ${CMAKE_CURRENT_BINARY_DIR}/gnuradio-zeromq.rc
     )
 endif(MSVC)
 
+list(APPEND zeromq_libs
+    gnuradio-runtime
+    ${Boost_LIBRARIES}
+    ${ZEROMQ_LIBRARIES}
+)
 
-
-if(BUILD_SHARED_LIBS)
-  GR_LIBRARY_FOO(gnuradio-zeromq ZeroMQ)
-endif()
+add_library(gnuradio-zeromq SHARED ${zeromq_sources})
+target_link_libraries(gnuradio-zeromq ${zeromq_libs})
+GR_LIBRARY_FOO(gnuradio-zeromq RUNTIME_COMPONENT "zeromq_runtime" DEVEL_COMPONENT "zeromq_devel")

@@ -3,8 +3,20 @@
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
 #
 """
 A base class is created.
@@ -13,26 +25,23 @@ Classes based upon this are used to make more user-friendly interfaces
 to the doxygen xml docs than the generated classes provide.
 """
 
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import os
 import pdb
 
 from xml.parsers.expat import ExpatError
 
-from .generated import compound
+from generated import compound
 
 
 class Base(object):
 
-    class Duplicate(Exception):
+    class Duplicate(StandardError):
         pass
 
-    class NoSuchMember(Exception):
+    class NoSuchMember(StandardError):
         pass
 
-    class ParsingError(Exception):
+    class ParsingError(StandardError):
         pass
 
     def __init__(self, parse_data, top=None):
@@ -85,7 +94,7 @@ class Base(object):
         for cls in self.mem_classes:
             if cls.can_parse(mem):
                 return cls
-        raise Exception(("Did not find a class for object '%s'." \
+        raise StandardError(("Did not find a class for object '%s'." \
                                  % (mem.get_name())))
 
     def convert_mem(self, mem):
@@ -93,11 +102,11 @@ class Base(object):
             cls = self.get_cls(mem)
             converted = cls.from_parse_data(mem, self.top)
             if converted is None:
-                raise Exception('No class matched this object.')
+                raise StandardError('No class matched this object.')
             self.add_ref(converted)
             return converted
-        except Exception as e:
-            print(e)
+        except StandardError, e:
+            print e
 
     @classmethod
     def includes(cls, inst):

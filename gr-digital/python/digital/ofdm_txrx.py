@@ -1,11 +1,23 @@
 #
 # Copyright 2013 Free Software Foundation, Inc.
-#
+# 
 # This file is part of GNU Radio
-#
-# SPDX-License-Identifier: GPL-3.0-or-later
-#
-#
+# 
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
+# 
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
+# 
 """
 OFDM Transmitter / Receiver hier blocks.
 
@@ -13,21 +25,24 @@ For simple configurations, no need to connect all the relevant OFDM blocks
 to form an OFDM Tx/Rx--simply use these.
 """
 
-from __future__ import print_function
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import unicode_literals
-
 # Reminder: All frequency-domain stuff is in shifted form, i.e. DC carrier
 # in the middle!
 
-
 import numpy
+from gnuradio import gr
+import digital_swig as digital
+from utils import tagged_streams
 
-from gnuradio import gr, blocks, fft, analog
-
-from . import digital_swig as digital
-
+try:
+    # This will work when feature #505 is added.
+    from gnuradio import fft
+    from gnuradio import blocks
+    from gnuradio import analog
+except ImportError:
+    # Until then this will work.
+    import fft_swig as fft
+    import blocks_swig as blocks
+    import analog_swig as analog
 
 _def_fft_len = 64
 _def_cp_len = 16
@@ -35,7 +50,7 @@ _def_frame_length_tag_key = "frame_length"
 _def_packet_length_tag_key = "packet_length"
 _def_packet_num_tag_key = "packet_num"
 # Data and pilot carriers are same as in 802.11a
-_def_occupied_carriers = (list(range(-26, -21)) + list(range(-20, -7)) + list(range(-6, 0)) + list(range(1, 7)) + list(range(8, 21)) + list(range(22, 27)),)
+_def_occupied_carriers = (range(-26, -21) + range(-20, -7) + range(-6, 0) + range(1, 7) + range(8, 21) + range(22, 27),)
 _def_pilot_carriers=((-21, -7, 7, 21,),)
 _pilot_sym_scramble_seq = (
         1,1,1,1, -1,-1,-1,1, -1,-1,-1,-1, 1,1,-1,1, -1,-1,1,1, -1,1,1,-1, 1,1,1,1, 1,1,-1,1,
@@ -97,11 +112,11 @@ def _get_constellation(bps):
     try:
         return constellation[bps]
     except KeyError:
-        print('Modulation not supported.')
+        print 'Modulation not supported.'
         exit(1)
 
 class ofdm_tx(gr.hier_block2):
-    """Hierarchical block for OFDM modulation.
+    """ Hierarchical block for OFDM modulation.
 
     The input is a byte stream (unsigned char) and the
     output is the complex modulated signal at baseband.
@@ -115,16 +130,13 @@ class ofdm_tx(gr.hier_block2):
     pilot_symbols: The pilot symbols.
     bps_header: Bits per symbol (header).
     bps_payload: Bits per symbol (payload).
-    sync_word1: The first sync preamble symbol. This has to be with
-    |           zeros on alternating carriers. Used for fine and
-    |           coarse frequency offset and timing estimation.
-    sync_word2: The second sync preamble symbol. This has to be filled
-    |           entirely. Also used for coarse frequency offset and
-    |           channel estimation.
+    sync_word1: The first sync preamble symbol. This has to be with zeros on alternating carriers.
+                Used for fine and coarse frequency offset and timing estimation.
+    sync_word2: The second sync preamble symbol. This has to be filled entirely. Also used for
+                coarse frequency offset and channel estimation.
     rolloff: The rolloff length in samples. Must be smaller than the CP.
     debug_log: Write output into log files (Warning: creates lots of data!)
     scramble_bits: Activates the scramblers (set this to True unless debugging)
-
     """
     def __init__(self, fft_len=_def_fft_len, cp_len=_def_cp_len,
                  packet_length_tag_key=_def_packet_length_tag_key,
@@ -247,7 +259,7 @@ class ofdm_tx(gr.hier_block2):
 
 
 class ofdm_rx(gr.hier_block2):
-    """Hierarchical block for OFDM demodulation.
+    """ Hierarchical block for OFDM demodulation.
 
     The input is a complex baseband signal (e.g. from a UHD source).
     The detected packets are output as a stream of packed bits on the output.
@@ -262,12 +274,10 @@ class ofdm_rx(gr.hier_block2):
     pilot_symbols: The pilot symbols.
     bps_header: Bits per symbol (header).
     bps_payload: Bits per symbol (payload).
-    sync_word1: The first sync preamble symbol. This has to be with
-    |           zeros on alternating carriers. Used for fine and
-    |           coarse frequency offset and timing estimation.
-    sync_word2: The second sync preamble symbol. This has to be filled
-    |           entirely. Also used for coarse frequency offset and
-    |           channel estimation.
+    sync_word1: The first sync preamble symbol. This has to be with zeros on alternating carriers.
+                Used for fine and coarse frequency offset and timing estimation.
+    sync_word2: The second sync preamble symbol. This has to be filled entirely. Also used for
+                coarse frequency offset and channel estimation.
     """
     def __init__(self, fft_len=_def_fft_len, cp_len=_def_cp_len,
                  frame_length_tag_key=_def_frame_length_tag_key,
@@ -383,6 +393,7 @@ class ofdm_rx(gr.hier_block2):
             self.connect((chanest, 0),      blocks.tag_debug(gr.sizeof_gr_complex * fft_len, 'post-hdr-chanest'))
             self.connect(header_eq,         blocks.file_sink(gr.sizeof_gr_complex * fft_len, 'post-hdr-eq.dat'))
             self.connect(header_serializer, blocks.file_sink(gr.sizeof_gr_complex,           'post-hdr-serializer.dat'))
+            self.connect(header_descrambler, blocks.file_sink(1,                             'post-hdr-demod.dat'))
         ### Payload demod ####################################################
         payload_fft = fft.fft_vcc(self.fft_len, True, (), True)
         payload_constellation = _get_constellation(bps_payload)
@@ -435,4 +446,6 @@ class ofdm_rx(gr.hier_block2):
             self.connect(payload_serializer, blocks.file_sink(gr.sizeof_gr_complex,         'post-payload-serializer.dat'))
             self.connect(payload_demod,      blocks.file_sink(1,                            'post-payload-demod.dat'))
             self.connect(payload_pack,       blocks.file_sink(1,                            'post-payload-pack.dat'))
-            self.connect(self.crc,           blocks.file_sink(1,                            'post-payload-crc.dat'))
+            self.connect(crc,                blocks.file_sink(1,                            'post-payload-crc.dat'))
+
+

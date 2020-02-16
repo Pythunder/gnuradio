@@ -4,8 +4,20 @@
 # 
 # This file is part of GNU Radio
 # 
-# SPDX-License-Identifier: GPL-3.0-or-later
-#
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
+# 
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
 # 
 """
 This module contains functions for aligning sequences.
@@ -29,8 +41,6 @@ This module contains functions for aligning sequences.
 (100, -20)
 
 """
-from __future__ import division
-from __future__ import unicode_literals
 
 import random
 
@@ -53,7 +63,7 @@ def compare_sequences(d1, d2, offset, sample_indices=None):
     """
     max_index = min(len(d1), len(d2)+offset)
     if sample_indices is None:
-        sample_indices = list(range(0, max_index))
+        sample_indices = range(0, max_index)
     correct = 0
     total = 0
     for i in sample_indices:
@@ -74,8 +84,8 @@ def random_sample(size, num_samples=def_num_samples, seed=None):
     if num_samples > size:
         indices = set(range(0, size))
     else:
-        if num_samples > size / 2:
-            num_samples = num_samples / 2
+        if num_samples > size/2:
+            num_samples = num_samples/2
         indices = set([])
         while len(indices) < num_samples:
             index = rndm.randint(0, size-1)
@@ -109,8 +119,8 @@ def align_sequences(d1, d2,
     best_offset = None
     best_compared = None
     best_correct = None
-    pos_range = list(range(0, min(len(d1), max_offset)))
-    neg_range = list(range(-1, -min(len(d2), max_offset), -1))
+    pos_range = range(0, min(len(d1), max_offset))
+    neg_range = range(-1, -min(len(d2), max_offset), -1)
     # Interleave the positive and negative offsets.
     int_range = [item for items in zip(pos_range, neg_range) for item in items]
     for offset in int_range:

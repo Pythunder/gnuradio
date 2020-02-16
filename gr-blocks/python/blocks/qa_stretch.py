@@ -4,11 +4,21 @@
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 #
-
-from __future__ import division
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
+#
 
 from gnuradio import gr, gr_unittest, blocks
 
@@ -24,8 +34,8 @@ class test_stretch(gr_unittest.TestCase):
         tb = self.tb
 
         data = 10*[1,]
-        data0 = [x / 20.0 for x in data]
-        data1 = [x / 10.0 for x in data]
+        data0 = map(lambda x: x/20.0, data)
+        data1 = map(lambda x: x/10.0, data)
 
         expected_result0 = 10*[0.05,]
         expected_result1 = 10*[0.1,]
@@ -37,7 +47,7 @@ class test_stretch(gr_unittest.TestCase):
         deinter = blocks.vector_to_streams(gr.sizeof_float, 2)
         dst0 = blocks.vector_sink_f()
         dst1 = blocks.vector_sink_f()
-
+        
         tb.connect(src0, (inter,0))
         tb.connect(src1, (inter,1))
         tb.connect(inter, op)

@@ -4,18 +4,28 @@
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
 #
 
-from __future__ import division
-from __future__ import unicode_literals
-from gnuradio import gr, gru, eng_notation, filter
+from gnuradio import gr, gru, eng_notation, optfir
 from gnuradio import audio
 from gnuradio import analog
 from gnuradio import blocks
-from gnuradio.eng_arg import eng_float, intx
-from argparse import ArgumentParser
+from gnuradio.eng_option import eng_option
+from optparse import OptionParser
 import sys
 import math
 
@@ -23,20 +33,24 @@ class wfm_rx_block (gr.top_block):
     def __init__(self):
         gr.top_block.__init__(self)
 
-        parser = ArgumentParser(description="Decode WFM signal into WAV file.")
-        parser.add_argument("-V", "--volume", type=eng_float,
-                help="Volume (dB) <%r, %r> (default is midpoint)" % \
-                        self.volume_range()[:2])
-        parser.add_argument("input_file", help="Input file (complex samples)")
-        parser.add_argument("output_file", help="Output WAV file")
+        usage = "usage: %prog [options] input-samples-320kS.dat output.wav"
+        parser=OptionParser(option_class=eng_option, usage=usage)
+        parser.add_option("-V", "--volume", type="eng_float", default=None,
+                          help="set volume (default is midpoint)")
 
-        args = parser.parse_args()
+        (options, args) = parser.parse_args()
+        if len(args) != 2:
+            parser.print_help()
+            sys.exit(1)
+
+        input_filename = args[0]
+        output_filename = args[1]
 
         self.vol = 0
 
         # build graph
 
-        self.src = blocks.file_source(gr.sizeof_gr_complex, args.input_file, False)
+        self.src = blocks.file_source(gr.sizeof_gr_complex, input_filename, False)
 
         adc_rate = 64e6                             # 64 MS/s
         usrp_decim = 200
@@ -47,7 +61,7 @@ class wfm_rx_block (gr.top_block):
         audio_rate = demod_rate / audio_decimation  # 32 kHz
 
 
-        chan_filt_coeffs = filter.optfir.low_pass (1,    # gain
+        chan_filt_coeffs = optfir.low_pass (1,           # gain
                                             usrp_rate,   # sampling rate
                                             80e3,        # passband cutoff
                                             115e3,       # stopband cutoff
@@ -66,30 +80,41 @@ class wfm_rx_block (gr.top_block):
 
         # wave file as final sink
         if 1:
-            sink = blocks.wavfile_sink(args.output_file, 2, int(audio_rate), 16)
+            sink = blocks.wavfile_sink(output_filename, 2, int(audio_rate), 16)
         else:
             sink = audio.sink (int (audio_rate),
-                               args.audio_output,
+                               options.audio_output,
                                False)   # ok_to_block
 
         # now wire it all together
         self.connect (self.src, chan_filt, self.guts)
         self.connect ((self.guts, 0), self.volume_control_l, (sink, 0))
         self.connect ((self.guts, 1), self.volume_control_r, (sink, 1))
+        try:
+          self.guts.stereo_carrier_pll_recovery.squelch_enable(True)
+        except:
+          pass
+          #print "FYI: This implementation of the stereo_carrier_pll_recovery has no squelch implementation yet"
 
-        if args.volume is None:
+        if options.volume is None:
             g = self.volume_range()
-            args.volume = float(g[0]+g[1]) / 2
+            options.volume = float(g[0]+g[1])/2
 
         # set initial values
 
-        self.set_vol(args.volume)
+        self.set_vol(options.volume)
+        try:
+          self.guts.stereo_carrier_pll_recovery.set_lock_threshold(options.squelch)
+        except:
+          pass
+          #print "FYI: This implementation of the stereo_carrier_pll_recovery has no squelch implementation yet"
+
 
     def set_vol (self, vol):
         g = self.volume_range()
         self.vol = max(g[0], min(g[1], vol))
-        self.volume_control_l.set_k(10**(self.vol / 10))
-        self.volume_control_r.set_k(10**(self.vol / 10))
+        self.volume_control_l.set_k(10**(self.vol/10))
+        self.volume_control_r.set_k(10**(self.vol/10))
 
     def volume_range(self):
         return (-20.0, 0.0, 0.5)

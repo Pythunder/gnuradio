@@ -4,11 +4,21 @@
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 #
-
-from __future__ import division
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
+#
 
 from gnuradio import gr, gr_unittest, blocks
 
@@ -22,10 +32,10 @@ class test_interleave (gr_unittest.TestCase):
 
     def test_int_001 (self):
         lenx = 64
-        src0 = blocks.vector_source_f (list(range(0, lenx, 4)))
-        src1 = blocks.vector_source_f (list(range(1, lenx, 4)))
-        src2 = blocks.vector_source_f (list(range(2, lenx, 4)))
-        src3 = blocks.vector_source_f (list(range(3, lenx, 4)))
+        src0 = blocks.vector_source_f (range (0, lenx, 4))
+        src1 = blocks.vector_source_f (range (1, lenx, 4))
+        src2 = blocks.vector_source_f (range (2, lenx, 4))
+        src3 = blocks.vector_source_f (range (3, lenx, 4))
         op = blocks.interleave (gr.sizeof_float)
         dst = blocks.vector_sink_f ()
 
@@ -44,13 +54,13 @@ class test_interleave (gr_unittest.TestCase):
         lenx = 64
         plusup_big = lambda a: a + (blksize * 4)
         plusup_little = lambda a: a + blksize
-        a_vec = list(range(0,blksize))
-        for i in range(0,(lenx // (4 * blksize)) - 1):
-            a_vec += list(map(plusup_big, a_vec[len(a_vec) - blksize:]))
+        a_vec = range(0,blksize)
+        for i in range(0,(lenx/(4 * blksize)) - 1):
+            a_vec += map(plusup_big, a_vec[len(a_vec) - blksize:])
 
-        b_vec = list(map(plusup_little, a_vec))
-        c_vec = list(map(plusup_little, b_vec))
-        d_vec = list(map(plusup_little, c_vec))
+        b_vec = map(plusup_little, a_vec)
+        c_vec = map(plusup_little, b_vec)
+        d_vec = map(plusup_little, c_vec)
 
         src0 = blocks.vector_source_f (a_vec)
         src1 = blocks.vector_source_f (b_vec)
@@ -72,7 +82,7 @@ class test_interleave (gr_unittest.TestCase):
 
     def test_deint_001 (self):
         lenx = 64
-        src = blocks.vector_source_f (list(range(lenx)))
+        src = blocks.vector_source_f (range (lenx))
         op = blocks.deinterleave (gr.sizeof_float)
         dst0 = blocks.vector_sink_f ()
         dst1 = blocks.vector_sink_f ()
@@ -99,7 +109,7 @@ class test_interleave (gr_unittest.TestCase):
     def test_deint_002 (self):
         blksize = 4
         lenx = 64
-        src = blocks.vector_source_f (list(range(lenx)))
+        src = blocks.vector_source_f (range (lenx))
         op = blocks.deinterleave (gr.sizeof_float, blksize)
         dst0 = blocks.vector_sink_f ()
         dst1 = blocks.vector_sink_f ()
@@ -115,13 +125,13 @@ class test_interleave (gr_unittest.TestCase):
 
         plusup_big = lambda a: a + (blksize * 4)
         plusup_little = lambda a: a + blksize
-        a_vec = list(range(0,blksize))
-        for i in range(0,(lenx // (4 * blksize)) - 1):
-            a_vec += list(map(plusup_big, a_vec[len(a_vec) - blksize:]))
+        a_vec = range(0,blksize)
+        for i in range(0,(lenx/(4 * blksize)) - 1):
+            a_vec += map(plusup_big, a_vec[len(a_vec) - blksize:])
 
-        b_vec = list(map(plusup_little, a_vec))
-        c_vec = list(map(plusup_little, b_vec))
-        d_vec = list(map(plusup_little, c_vec))
+        b_vec = map(plusup_little, a_vec)
+        c_vec = map(plusup_little, b_vec)
+        d_vec = map(plusup_little, c_vec)
 
         expected_result0 = tuple (a_vec)
         expected_result1 = tuple (b_vec)

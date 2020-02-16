@@ -1,17 +1,28 @@
 #!/usr/bin/env python
-# Copyright 2012-2014 Free Software Foundation, Inc.
+# Copyright 2012,2013 Free Software Foundation, Inc.
 # 
 # This file is part of GNU Radio
 # 
-# SPDX-License-Identifier: GPL-3.0-or-later
-#
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 # 
-
-from __future__ import division
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
+# 
 
 import sys
 import numpy
 import random
+
 import numpy
 
 from gnuradio import gr, gr_unittest, blocks, analog, digital
@@ -30,10 +41,9 @@ def rand_range(min_val, max_val):
     return random.random() * (max_val - min_val) + min_val
 
 
-class qa_ofdm_chanest_vcvc (gr_unittest.TestCase):
+class qa_ofdm_sync_eqinit_vcvc (gr_unittest.TestCase):
 
     def setUp (self):
-        random.seed(0)
         self.tb = gr.top_block ()
 
     def tearDown (self):
@@ -194,7 +204,7 @@ class qa_ofdm_chanest_vcvc (gr_unittest.TestCase):
         tx_data = shift_tuple(sync_symbol1, carr_offset) + \
                   shift_tuple(sync_symbol2, carr_offset) + \
                   shift_tuple(data_symbol, carr_offset)
-        channel = list(range(fft_len))
+        channel = range(fft_len)
         src = blocks.vector_source_c(tx_data, False, fft_len)
         chan = blocks.multiply_const_vcc(channel)
         chanest = digital.ofdm_chanest_vcvc(sync_symbol1, sync_symbol2, 1)
@@ -225,7 +235,7 @@ class qa_ofdm_chanest_vcvc (gr_unittest.TestCase):
         n_iter = 20 # The more the accurater
         def run_flow_graph(sync_sym1, sync_sym2, data_sym):
             top_block = gr.top_block()
-            carr_offset = random.randint(-max_offset / 2, max_offset / 2) * 2
+            carr_offset = random.randint(-max_offset/2, max_offset/2) * 2
             tx_data = shift_tuple(sync_sym1, carr_offset) + \
                       shift_tuple(sync_sym2, carr_offset) + \
                       shift_tuple(data_sym,  carr_offset)
@@ -256,14 +266,14 @@ class qa_ofdm_chanest_vcvc (gr_unittest.TestCase):
                     rx_sym_est[i] = (sink.data()[i] / channel_est[i]).real
             return (carr_offset, list(shift_tuple(rx_sym_est, -carr_offset_hat)))
         bit_errors = 0
-        for k in range(n_iter):
+        for k in xrange(n_iter):
             sync_sym = [(random.randint(0, 1) * 2 - 1) * syncsym_mask[i] for i in range(fft_len)]
             ref_sym  = [(random.randint(0, 1) * 2 - 1) * carrier_mask[i] for i in range(fft_len)]
             data_sym = [(random.randint(0, 1) * 2 - 1) * carrier_mask[i] for i in range(fft_len)]
             data_sym[26] = 1
             (carr_offset, rx_sym) = run_flow_graph(sync_sym, ref_sym, data_sym)
             rx_sym_est = [0,] * fft_len
-            for i in range(fft_len):
+            for i in xrange(fft_len):
                 if carrier_mask[i] == 0:
                     continue
                 rx_sym_est[i] = {True: 1, False: -1}[rx_sym[i] > 0]
@@ -274,5 +284,5 @@ class qa_ofdm_chanest_vcvc (gr_unittest.TestCase):
 
 
 if __name__ == '__main__':
-    gr_unittest.run(qa_ofdm_chanest_vcvc, "qa_ofdm_chanest_vcvc.xml")
+    gr_unittest.run(qa_ofdm_sync_eqinit_vcvc, "qa_ofdm_sync_eqinit_vcvc.xml")
 

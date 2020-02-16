@@ -1,17 +1,29 @@
-from __future__ import unicode_literals
 #
 # Copyright 2013 Free Software Foundation, Inc.
 #
 # This file is part of GNU Radio.
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# This is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
+#
+# This software is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this software; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
 #
 
 ###############################################################################
 # Imports
 ###############################################################################
-from argparse import ArgumentParser
-from gnuradio.eng_arg import eng_float, intx
+from optparse import OptionParser
+from gnuradio.eng_option import eng_option
 import gui
 import sys
 import os
@@ -100,7 +112,7 @@ class gui(QtGui.QMainWindow):
 
     # plot the data from the queues
     def plot_data(self, plot, samples):
-        self.x = list(range(0,len(samples),1))
+        self.x = range(0,len(samples),1)
         self.y = samples
         # clear the previous points from the plot
         plot.clear()
@@ -118,35 +130,35 @@ class gui(QtGui.QMainWindow):
         self.plot_data(self.gui.qwtPlotClient, samples)
 
     def set_waveform(self, waveform_str):
-        self.rpc_mgr_server.request("set_waveform",[str(waveform_str)])
+        self.rpc_mgr_server.request("set_waveform",str(waveform_str))
 
     def set_gain(self, gain):
         self.rpc_set_gain(gain)
 
     def rpc_set_gain(self, gain):
-        self.rpc_mgr_server.request("set_k",[gain])
+        self.rpc_mgr_server.request("set_k",gain)
 
 ###############################################################################
 # Options Parser
 ###############################################################################
-def parse_args():
-    """Options parser."""
-    parser = ArgumentParser()
-    parser.add_argument("-s", "--servername", default="localhost",
+def parse_options():
+    """ Options parser. """
+    parser = OptionParser(option_class=eng_option, usage="%prog: [options]")
+    parser.add_option("-s", "--servername", type="string", default="localhost",
                       help="Server hostname")
-    parser.add_argument("-c", "--clientname", default="localhost",
+    parser.add_option("-c", "--clientname", type="string", default="localhost",
                       help="Server hostname")
-    args = parser.parse_args()
-    return args
+    (options, args) = parser.parse_args()
+    return options
 
 
 ###############################################################################
 # Main
 ###############################################################################
 if __name__ == "__main__":
-    args = parse_args()
+    options = parse_options()
     qapp = Qt.QApplication(sys.argv)
-    qapp.main_window = gui("Remote GNU Radio GUI", args)
+    qapp.main_window = gui("Remote GNU Radio GUI",options)
     qapp.main_window.show()
     qapp.exec_()
 

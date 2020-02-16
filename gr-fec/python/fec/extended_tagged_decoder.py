@@ -4,27 +4,37 @@
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
 #
 
-from __future__ import print_function
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import unicode_literals
+from gnuradio import gr, blocks
+import fec_swig as fec
+from bitflip import *
+import sys
 
-from gnuradio import gr, blocks, digital
-
-from . import fec_swig as fec
-
-from .bitflip import *
-
+if sys.modules.has_key("gnuradio.digital"):
+    digital = sys.modules["gnuradio.digital"]
+else:
+    from gnuradio import digital
 
 class extended_tagged_decoder(gr.hier_block2):
 
 #solution to log_(1-2*t)(1-2*.0335) = 1/taps where t is thresh (syndrome density)
 #for i in numpy.arange(.1, .499, .01):
-    #print(str(log((1-(2 * .035)), (1-(2 * i)))) + ':' + str(i);)
+    #print str(log((1-(2 * .035)), (1-(2 * i)))) + ':' + str(i);
     garbletable = {
         0.310786835319:0.1,
         0.279118162802:0.11,
@@ -69,8 +79,7 @@ class extended_tagged_decoder(gr.hier_block2):
     }
 
     def __init__(self, decoder_obj_list, ann=None, puncpat='11',
-                 integration_period=10000, flush=None, rotator=None, lentagname=None,
-                 mtu=1500):
+                 integration_period=10000, flush=None, rotator=None, lentagname=None):
         gr.hier_block2.__init__(self, "extended_decoder",
                                 gr.io_signature(1, 1, gr.sizeof_float),
                                 gr.io_signature(1, 1, gr.sizeof_char))
@@ -126,13 +135,13 @@ class extended_tagged_decoder(gr.hier_block2):
                 cat.append(i);
 
             synd_garble = .49
-            idx_list = list(self.garbletable.keys())
+            idx_list = self.garbletable.keys()
             idx_list.sort()
             for i in idx_list:
-                if 1.0 / self.ann.count('1') >= i:
+                if 1.0/self.ann.count('1') >= i:
                     synd_garble = self.garbletable[i]
-            print('using syndrom garble threshold ' + str(synd_garble) + 'for conv_bit_corr_bb')
-            print('ceiling: .0335 data garble rate')
+            print 'using syndrom garble threshold ' + str(synd_garble) + 'for conv_bit_corr_bb'
+            print 'ceiling: .0335 data garble rate'
             self.blocks.append(fec.conv_bit_corr_bb(cat, len(puncpat) - puncpat.count('0'),
                                            len(ann), integration_period, flush, synd_garble))
 
@@ -154,7 +163,7 @@ class extended_tagged_decoder(gr.hier_block2):
                 self.blocks.append(fec.tagged_decoder(decoder_obj,
                                                       fec.get_decoder_input_item_size(decoder_obj),
                                                       fec.get_decoder_output_item_size(decoder_obj),
-                                                      lentagname, mtu))
+                                                      lentagname))
 
         if fec.get_decoder_output_conversion(decoder_obj) == "unpack":
             self.blocks.append(blocks.packed_to_unpacked_bb(1, gr.GR_MSB_FIRST));

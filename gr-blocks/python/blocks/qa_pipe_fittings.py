@@ -4,10 +4,21 @@
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 #
-
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
+#
 
 from gnuradio import gr, gr_unittest, blocks
 
@@ -15,7 +26,7 @@ def calc_expected_result(src_data, n):
     assert (len(src_data) % n) == 0
     result = [list() for x in range(n)]
     #print "len(result) =", len(result)
-    for i in range(len(src_data)):
+    for i in xrange(len(src_data)):
         (result[i % n]).append(src_data[i])
     return [tuple(x) for x in result]
 
@@ -34,7 +45,7 @@ class test_pipe_fittings(gr_unittest.TestCase):
         """
         n = 8
         src_len = n * 8
-        src_data = list(range(src_len))
+        src_data = range(src_len)
 
         expected_results = calc_expected_result(src_data, n)
         #print "expected results: ", expected_results

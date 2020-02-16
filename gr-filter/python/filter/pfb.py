@@ -4,21 +4,31 @@
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
 #
 
-from __future__ import print_function
-from __future__ import division
-from __future__ import unicode_literals
+import optfir, math
 
-import math
+from gnuradio import gr, fft
+import filter_swig as filter
 
-from gnuradio import gr, fft, blocks
-
-from . import optfir
-from . import filter_swig as filter
-
+try:
+    from gnuradio import blocks
+except ImportError:
+    import blocks_swig as blocks
 
 class channelizer_ccf(gr.hier_block2):
     '''
@@ -61,7 +71,7 @@ class channelizer_ccf(gr.hier_block2):
                                               self._oversample_rate)
         self.connect(self, self.s2ss)
 
-        for i in range(self._nchans):
+        for i in xrange(self._nchans):
             self.connect((self.s2ss,i), (self.pfb,i))
             self.connect((self.pfb,i), (self,i))
 
@@ -73,10 +83,6 @@ class channelizer_ccf(gr.hier_block2):
 
     def taps(self):
         return self.pfb.taps()
-
-    def declare_sample_delay(self, delay):
-        self.pfb.declare_sample_delay(delay)
-
 
 class interpolator_ccf(gr.hier_block2):
     '''
@@ -137,9 +143,9 @@ class decimator_ccf(gr.hier_block2):
     '''
     def __init__(self, decim, taps=None, channel=0, atten=100,
                  use_fft_rotators=True, use_fft_filters=True):
-        gr.hier_block2.__init__(self, "pfb_decimator_ccf",
-                                gr.io_signature(1, 1, gr.sizeof_gr_complex),
-                                gr.io_signature(1, 1, gr.sizeof_gr_complex))
+	gr.hier_block2.__init__(self, "pfb_decimator_ccf",
+				gr.io_signature(1, 1, gr.sizeof_gr_complex),
+				gr.io_signature(1, 1, gr.sizeof_gr_complex))
 
         self._decim = decim
         self._channel = channel
@@ -171,7 +177,7 @@ class decimator_ccf(gr.hier_block2):
 
         self.connect(self, self.s2ss)
 
-        for i in range(self._decim):
+        for i in xrange(self._decim):
             self.connect((self.s2ss,i), (self.pfb,i))
 
         self.connect(self.pfb, self)
@@ -217,7 +223,7 @@ class arb_resampler_ccf(gr.hier_block2):
             if(self._rate < 1):
                 halfband = 0.5*self._rate
                 bw = percent*halfband
-                tb = (percent / 2.0)*halfband
+                tb = (percent/2.0)*halfband
                 ripple = 0.1
 
                 # As we drop the bw factor, the optfir filter has a harder time converging;
@@ -227,7 +233,7 @@ class arb_resampler_ccf(gr.hier_block2):
             else:
                 halfband = 0.5
                 bw = percent*halfband
-                tb = (percent / 2.0)*halfband
+                tb = (percent/2.0)*halfband
                 ripple = 0.1
 
                 made = False
@@ -245,7 +251,7 @@ class arb_resampler_ccf(gr.hier_block2):
                             raise RuntimeError("optfir could not generate an appropriate filter.")
 
         self.pfb = filter.pfb_arb_resampler_ccf(self._rate, self._taps, self._size)
-        #print("PFB has %d taps\n" % (len(self._taps),))
+        #print "PFB has %d taps\n" % (len(self._taps),)
 
         self.connect(self, self.pfb)
         self.connect(self.pfb, self)
@@ -291,7 +297,7 @@ class arb_resampler_fff(gr.hier_block2):
             if(self._rate < 1):
                 halfband = 0.5*self._rate
                 bw = percent*halfband
-                tb = (percent / 2.0)*halfband
+                tb = (percent/2.0)*halfband
                 ripple = 0.1
 
                 # As we drop the bw factor, the optfir filter has a harder time converging;
@@ -301,7 +307,7 @@ class arb_resampler_fff(gr.hier_block2):
             else:
                 halfband = 0.5
                 bw = percent*halfband
-                tb = (percent / 2.0)*halfband
+                tb = (percent/2.0)*halfband
                 ripple = 0.1
 
                 made = False
@@ -395,14 +401,14 @@ class channelizer_hier_ccf(gr.hier_block2):
     Make a Polyphase Filter channelizer (complex in, complex out, floating-point taps)
 
     Args:
-    n_chans: The number of channels to split into.
-    n_filterbanks: The number of filterbank blocks to use (default=2).
-    taps: The taps to use.  If this is `None` then taps are generated using optfir.low_pass.
-    outchans: Which channels to output streams for (a list of integers) (default is all channels).
-    atten: Stop band attenuation.
-    bw: The fraction of the channel you want to keep.
-    tb: Transition band with as fraction of channel width.
-    ripple: Pass band ripple in dB.
+        n_chans - The number of channels to split into.
+        n_filterbanks - The number of filterbank blocks to use (default=2).
+        taps: The taps to use.  If this is `None` then taps are generated using optfir.low_pass.
+        outchans - Which channels to output streams for (a list of integers) (default is all channels).
+        atten: Stop band attenuation.
+        bw: The fraction of the channel you want to keep.
+        tb: Transition band with as fraction of channel width.
+        ripple: Pass band ripple in dB.
     """
 
     def __init__(self, n_chans, n_filterbanks=1, taps=None, outchans=None,
@@ -410,7 +416,7 @@ class channelizer_hier_ccf(gr.hier_block2):
         if n_filterbanks > n_chans:
             n_filterbanks = n_chans
         if outchans is None:
-            outchans = list(range(n_chans))
+            outchans = range(n_chans)
         gr.hier_block2.__init__(
             self, "pfb_channelizer_hier_ccf",
             gr.io_signature(1, 1, gr.sizeof_gr_complex),
@@ -426,7 +432,7 @@ class channelizer_hier_ccf(gr.hier_block2):
         self.s2v = blocks.stream_to_vector(gr.sizeof_gr_complex, n_chans)
         # Create a mapping to separate out each filterbank (a group of channels to be processed together)
         # And a list of sets of taps for each filterbank.
-        low_cpp = int(n_chans / n_filterbanks)
+        low_cpp = int(n_chans/n_filterbanks)
         extra = n_chans - low_cpp*n_filterbanks
         cpps = [low_cpp+1]*extra + [low_cpp]*(n_filterbanks-extra)
         splitter_mapping = []
@@ -450,7 +456,7 @@ class channelizer_hier_ccf(gr.hier_block2):
         # Add the final FFT to the channelizer.
         self.fft = fft.fft_vcc(n_chans, forward=True, window=[1.0]*n_chans)
         # Select the desired channels
-        if outchans != list(range(n_chans)):
+        if outchans != range(n_chans):
             selector_mapping = [[(0, i) for i in outchans]]
             self.selector = blocks.vector_map(gr.sizeof_gr_complex, [n_chans], selector_mapping)
         # Convert stream of vectors to a normal stream.
@@ -459,7 +465,7 @@ class channelizer_hier_ccf(gr.hier_block2):
         for i in range(0, n_filterbanks):
             self.connect((self.splitter, i), self.fbs[i], (self.combiner, i))
         self.connect(self.combiner, self.fft)
-        if outchans != list(range(n_chans)):
+        if outchans != range(n_chans):
             self.connect(self.fft, self.selector, self.v2ss)
         else:
             self.connect(self.fft, self.v2ss)

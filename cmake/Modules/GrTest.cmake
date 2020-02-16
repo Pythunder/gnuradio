@@ -2,20 +2,25 @@
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
 
 if(DEFINED __INCLUDED_GR_TEST_CMAKE)
     return()
 endif()
 set(__INCLUDED_GR_TEST_CMAKE TRUE)
-
-function (GR_CONVERT_QUOTED_STRING path_str quoted_path)
-    file(TO_NATIVE_PATH "${path_str}" path_str)
-    string(CONCAT path_str "\"" ${path_str} "\"")
-    string(REPLACE "\\ " " " path_str ${path_str})
-    set(${quoted_path} "${path_str}" PARENT_SCOPE)
-endfunction()
 
 ########################################################################
 # Add a unit test and setup the environment for a unit test.
@@ -37,9 +42,12 @@ function(GR_ADD_TEST test_name)
         #we must manually set them in the PATH to run tests.
         #The following appends the path of a target dependency.
         foreach(target ${GR_TEST_TARGET_DEPS})
-            get_filename_component(path $<TARGET_FILE:$target> PATH)
-            string(REGEX REPLACE "\\$\\(.*\\)" "${CMAKE_BUILD_TYPE}" path "${path}")
-            list(APPEND GR_TEST_LIBRARY_DIRS ${path})
+            get_target_property(location ${target} LOCATION)
+            if(location)
+                get_filename_component(path ${location} PATH)
+                string(REGEX REPLACE "\\$\\(.*\\)" ${CMAKE_BUILD_TYPE} path ${path})
+                list(APPEND GR_TEST_LIBRARY_DIRS ${path})
+            endif(location)
         endforeach(target)
 
     if(WIN32)
@@ -54,15 +62,11 @@ function(GR_ADD_TEST test_name)
         endforeach(pydir)
     endif(WIN32)
 
-    GR_CONVERT_QUOTED_STRING("${CMAKE_CURRENT_BINARY_DIR}" bindir)
-    GR_CONVERT_QUOTED_STRING("${CMAKE_CURRENT_SOURCE_DIR}" srcdir)
-    GR_CONVERT_QUOTED_STRING("${GR_TEST_LIBRARY_DIRS}" libpath)
-    #GR_CONVERT_QUOTED_STRING("${GR_TEST_PYTHON_DIRS}" pypath)
-    # Keep the original path conversion for pypath - the above commented line breaks CI tests
+    file(TO_NATIVE_PATH ${CMAKE_CURRENT_SOURCE_DIR} srcdir)
+    file(TO_NATIVE_PATH "${GR_TEST_LIBRARY_DIRS}" libpath) #ok to use on dir list?
     file(TO_NATIVE_PATH "${GR_TEST_PYTHON_DIRS}" pypath) #ok to use on dir list?
 
-    set(environs "VOLK_GENERIC=1" "GR_DONT_LOAD_PREFS=1" "srcdir=${srcdir}"
-        "GR_CONF_CONTROLPORT_ON=False")
+    set(environs "GR_DONT_LOAD_PREFS=1" "srcdir=${srcdir}")
     list(APPEND environs ${GR_TEST_ENVIRONS})
 
     #http://www.cmake.org/pipermail/cmake/2009-May/029464.html
@@ -77,7 +81,7 @@ function(GR_ADD_TEST test_name)
             set(LD_PATH_VAR "DYLD_LIBRARY_PATH")
         endif()
 
-        set(binpath "${bindir}:$PATH")
+        set(binpath "${CMAKE_CURRENT_BINARY_DIR}:$PATH")
         list(APPEND libpath "$${LD_PATH_VAR}")
         list(APPEND pypath "$PYTHONPATH")
 
@@ -108,6 +112,7 @@ function(GR_ADD_TEST test_name)
         execute_process(COMMAND chmod +x ${sh_file})
 
         add_test(${test_name} ${SHELL} ${sh_file})
+
     endif(UNIX)
 
     if(WIN32)
@@ -136,26 +141,3 @@ function(GR_ADD_TEST test_name)
     endif(WIN32)
 
 endfunction(GR_ADD_TEST)
-
-########################################################################
-# Add a C++ unit test and setup the environment for a unit test.
-# Takes the same arguments as the ADD_TEST function.
-#
-# test_name -- An identifier for your test, for usage with ctest -R
-# test_source -- Path to the .cc file
-#
-# Before calling set the following variables:
-# GR_TEST_TARGET_DEPS  - built targets for the library path
-########################################################################
-function(GR_ADD_CPP_TEST test_name test_source)
-    add_executable(${test_name} ${test_source})
-    target_link_libraries(
-        ${test_name}
-        ${GR_TEST_TARGET_DEPS}
-        Boost::unit_test_framework
-    )
-    set_target_properties(${test_name}
-        PROPERTIES COMPILE_DEFINITIONS "BOOST_TEST_DYN_LINK;BOOST_TEST_MAIN"
-    )
-    GR_ADD_TEST(${test_name} ${test_name})
-endfunction(GR_ADD_CPP_TEST)

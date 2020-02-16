@@ -3,18 +3,26 @@
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
 #
 
 # misc utilities
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import unicode_literals
-
 import types
-
+import exceptions
 
 class seq_with_cursor (object):
     __slots__ = [ 'items', 'index' ]
@@ -32,7 +40,7 @@ class seq_with_cursor (object):
         elif initial_index >= 0 and initial_index < len (self.items):
             self.index = initial_index
         else:
-            raise ValueError
+            raise exceptions.ValueError
 
     def set_index_by_value(self, v):
         """
@@ -43,9 +51,9 @@ class seq_with_cursor (object):
         cv = self.current()
         more = True
         while cv < v and more:
-            cv, more = next(self)      # side effect!
+            cv, more = self.next()      # side effect!
 
-    def __next__ (self):
+    def next (self):
         new_index = self.index + 1
         if new_index < len (self.items):
             self.index = new_index
@@ -66,3 +74,4 @@ class seq_with_cursor (object):
 
     def get_seq (self):
         return self.items[:]            # copy of items
+

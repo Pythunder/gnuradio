@@ -1,17 +1,27 @@
 #!/usr/bin/env python
 #
 # Copyright 2013 Free Software Foundation, Inc.
-#
+# 
 # This file is part of GNU Radio
-#
-# SPDX-License-Identifier: GPL-3.0-or-later
-#
-#
+# 
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
+# 
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
+# 
 
-from __future__ import absolute_import
-from __future__ import unicode_literals
 import numpy
-from .constellation_map_generator import constellation_map_generator
+from constellation_map_generator import *
 
 '''
 Note on the naming scheme. Each constellation is named using a prefix
@@ -104,9 +114,9 @@ sd_psk_2_1 = sd_psk_2_0x1
 
 def psk_4_0x0_0_1():
     '''
-    | 10 | 11
-    | -------
-    | 00 | 01
+    10 | 11
+    -------
+    00 | 01
     '''
     const_points = [-1-1j, 1-1j,
                     -1+1j, 1+1j]
@@ -117,79 +127,79 @@ psk_4_0 = psk_4
 
 def psk_4_0x1_0_1():
     '''
-    | 11 | 10
-    | -------
-    | 01 | 00
+    11 | 10
+    -------
+    01 | 00
     '''
     k = 0x1
     pi = [0, 1]
-    return constellation_map_generator(psk_4()[0], psk_4()[1], k, pi)
+    return constellation_map_generator(psk_4, k, pi)
 psk_4_1 = psk_4_0x1_0_1
 
 def psk_4_0x2_0_1():
     '''
-    | 00 | 01
-    | -------
-    | 10 | 11
+    00 | 01
+    -------
+    10 | 11
     '''
     k = 0x2
     pi = [0, 1]
-    return constellation_map_generator(psk_4()[0], psk_4()[1], k, pi)
+    return constellation_map_generator(psk_4, k, pi)
 psk_4_2 = psk_4_0x2_0_1
 
 def psk_4_0x3_0_1():
     '''
-    | 01 | 00
-    | -------
-    | 11 | 10
+    01 | 00
+    -------
+    11 | 10
     '''
     k = 0x3
     pi = [0, 1]
-    return constellation_map_generator(psk_4()[0], psk_4()[1], k, pi)
+    return constellation_map_generator(psk_4, k, pi)
 psk_4_3 = psk_4_0x3_0_1
 
 def psk_4_0x0_1_0():
     '''
-    | 01 | 11
-    | -------
-    | 00 | 10
+    01 | 11
+    -------
+    00 | 10
     '''
     k = 0x0
     pi = [1, 0]
-    return constellation_map_generator(psk_4()[0], psk_4()[1], k, pi)
+    return constellation_map_generator(psk_4, k, pi)
 psk_4_4 = psk_4_0x0_1_0
 
 def psk_4_0x1_1_0():
     '''
-    | 00 | 10
-    | -------
-    | 01 | 11
+    00 | 10
+    -------
+    01 | 11
     '''
     k = 0x1
     pi = [1, 0]
-    return constellation_map_generator(psk_4()[0], psk_4()[1], k, pi)
+    return constellation_map_generator(psk_4, k, pi)
 psk_4_5 = psk_4_0x1_1_0
 
 def psk_4_0x2_1_0():
     '''
-    | 11 | 01
-    | -------
-    | 10 | 00
+    11 | 01
+    -------
+    10 | 00
     '''
     k = 0x2
     pi = [1, 0]
-    return constellation_map_generator(psk_4()[0], psk_4()[1], k, pi)
+    return constellation_map_generator(psk_4, k, pi)
 psk_4_6 = psk_4_0x2_1_0
 
 def psk_4_0x3_1_0():
     '''
-    | 10 | 00
-    | -------
-    | 11 | 01
+    10 | 00
+    -------
+    11 | 01
     '''
     k = 0x3
     pi = [1, 0]
-    return constellation_map_generator(psk_4()[0], psk_4()[1], k, pi)
+    return constellation_map_generator(psk_4, k, pi)
 psk_4_7 = psk_4_0x3_1_0
 
 
@@ -200,9 +210,9 @@ psk_4_7 = psk_4_0x3_1_0
 
 def sd_psk_4_0x0_0_1(x, Es=1):
     '''
-    | 10 | 11
-    | -------
-    | 00 | 01
+    10 | 11
+    -------
+    00 | 01
     '''
     x_re = x.real
     x_im = x.imag
@@ -213,9 +223,9 @@ sd_psk_4_0 = sd_psk_4
 
 def sd_psk_4_0x1_0_1(x, Es=1):
     '''
-    | 11 | 10
-    | -------
-    | 01 | 00
+    11 | 10
+    -------
+    01 | 00
     '''
     x_re = x.real
     x_im = x.imag
@@ -225,9 +235,9 @@ sd_psk_4_1 = sd_psk_4_0x1_0_1
 
 def sd_psk_4_0x2_0_1(x, Es=1):
     '''
-    | 00 | 01
-    | -------
-    | 10 | 11
+    00 | 01
+    -------
+    10 | 11
     '''
     x_re = x.real
     x_im = x.imag
@@ -237,9 +247,9 @@ sd_psk_4_2 = sd_psk_4_0x2_0_1
 
 def sd_psk_4_0x3_0_1(x, Es=1):
     '''
-    | 01 | 00
-    | -------
-    | 11 | 10
+    01 | 00
+    -------
+    11 | 10
     '''
     x_re = x.real
     x_im = x.imag
@@ -249,9 +259,9 @@ sd_psk_4_3 = sd_psk_4_0x3_0_1
 
 def sd_psk_4_0x0_1_0(x, Es=1):
     '''
-    | 01 | 11
-    | -------
-    | 00 | 10
+    01 | 11
+    -------
+    00 | 10
     '''
     x_re = x.real
     x_im = x.imag
@@ -261,9 +271,9 @@ sd_psk_4_4 = sd_psk_4_0x0_1_0
 
 def sd_psk_4_0x1_1_0(x, Es=1):
     '''
-    | 00 | 10
-    | -------
-    | 01 | 11
+    00 | 10
+    -------
+    01 | 11
     '''
     x_re = x.real
     x_im = x.imag
@@ -274,9 +284,9 @@ sd_psk_4_5 = sd_psk_4_0x1_1_0
 
 def sd_psk_4_0x2_1_0(x, Es=1):
     '''
-    | 11 | 01
-    | -------
-    | 10 | 00
+    11 | 01
+    -------
+    10 | 00
     '''
     x_re = x.real
     x_im = x.imag
@@ -286,12 +296,13 @@ sd_psk_4_6 = sd_psk_4_0x2_1_0
 
 def sd_psk_4_0x3_1_0(x, Es=1):
     '''
-    | 10 | 00
-    | -------
-    | 11 | 01
+    10 | 00
+    -------
+    11 | 01
     '''
     x_re = x.real
     x_im = x.imag
     dist = Es*numpy.sqrt(2)
     return [-dist*x_re, -dist*x_im]
 sd_psk_4_7 = sd_psk_4_0x3_1_0
+

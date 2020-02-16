@@ -4,12 +4,21 @@
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 #
-
-from __future__ import absolute_import
-from __future__ import division
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
+#
 
 import os, math
 
@@ -19,9 +28,9 @@ import pmt
 import parse_file_metadata
 
 def sig_source_c(samp_rate, freq, amp, N):
-    t = [float(x) / samp_rate for x in range(N)]
-    y = [amp*math.cos(2.*math.pi*freq*x) + \
-                1j*amp*math.sin(2.*math.pi*freq*x) for x in t]
+    t = map(lambda x: float(x)/samp_rate, xrange(N))
+    y = map(lambda x: amp*math.cos(2.*math.pi*freq*x) + \
+                1j*amp*math.sin(2.*math.pi*freq*x), t)
     return y
 
 class test_file_metadata(gr_unittest.TestCase):
@@ -35,7 +44,7 @@ class test_file_metadata(gr_unittest.TestCase):
 
     def test_001(self):
         N = 1000
-        outfile = "test_out.dat"
+	outfile = "test_out.dat"
 
         detached = False
         samp_rate = 200000
@@ -43,17 +52,18 @@ class test_file_metadata(gr_unittest.TestCase):
         val = pmt.from_double(samp_rate)
         extras = pmt.make_dict()
         extras = pmt.dict_add(extras, key, val)
+        extras_str = pmt.serialize_str(extras)
 
         data = sig_source_c(samp_rate, 1000, 1, N)
         src  = blocks.vector_source_c(data)
         fsnk = blocks.file_meta_sink(gr.sizeof_gr_complex, outfile,
-                                     samp_rate, 1,
+                                     samp_rate, 1, 
                                      blocks.GR_FILE_FLOAT, True,
-                                     1000000, extras, detached)
+                                     1000000, extras_str, detached)
         fsnk.set_unbuffered(True)
 
-        self.tb.connect(src, fsnk)
-        self.tb.run()
+	self.tb.connect(src, fsnk)
+	self.tb.run()
         fsnk.close()
 
         handle = open(outfile, "rb")
@@ -96,7 +106,6 @@ class test_file_metadata(gr_unittest.TestCase):
         self.tb.connect(src, ssnk)
         self.tb.run()
 
-        fsrc.close() 
         # Test to make sure tags with 'samp_rate' and 'rx_rate' keys
         # were generated and received correctly.
         tags = tsnk.current_tags()
@@ -109,12 +118,12 @@ class test_file_metadata(gr_unittest.TestCase):
         # Test that the data portion was extracted and received correctly.
         self.assertComplexTuplesAlmostEqual(vsnk.data(), ssnk.data(), 5)
 
-        os.remove(outfile)
+	os.remove(outfile)
 
     def test_002(self):
         N = 1000
-        outfile = "test_out.dat"
-        outfile_hdr = "test_out.dat.hdr"
+	outfile = "test_out.dat"
+	outfile_hdr = "test_out.dat.hdr"
 
         detached = True
         samp_rate = 200000
@@ -122,17 +131,18 @@ class test_file_metadata(gr_unittest.TestCase):
         val = pmt.from_double(samp_rate)
         extras = pmt.make_dict()
         extras = pmt.dict_add(extras, key, val)
+        extras_str = pmt.serialize_str(extras)
 
         data = sig_source_c(samp_rate, 1000, 1, N)
         src  = blocks.vector_source_c(data)
         fsnk = blocks.file_meta_sink(gr.sizeof_gr_complex, outfile,
-                                     samp_rate, 1,
+                                     samp_rate, 1, 
                                      blocks.GR_FILE_FLOAT, True,
-                                     1000000, extras, detached)
+                                     1000000, extras_str, detached)
         fsnk.set_unbuffered(True)
 
-        self.tb.connect(src, fsnk)
-        self.tb.run()
+	self.tb.connect(src, fsnk)
+	self.tb.run()
         fsnk.close()
 
         # Open detached header for reading
@@ -177,7 +187,6 @@ class test_file_metadata(gr_unittest.TestCase):
         self.tb.connect(src, ssnk)
         self.tb.run()
 
-        fsrc.close()
         # Test to make sure tags with 'samp_rate' and 'rx_rate' keys
         # were generated and received correctly.
         tags = tsnk.current_tags()
@@ -190,8 +199,8 @@ class test_file_metadata(gr_unittest.TestCase):
         # Test that the data portion was extracted and received correctly.
         self.assertComplexTuplesAlmostEqual(vsnk.data(), ssnk.data(), 5)
 
-        os.remove(outfile)
-        os.remove(outfile_hdr)
+	os.remove(outfile)
+	os.remove(outfile_hdr)
 
 if __name__ == '__main__':
     gr_unittest.run(test_file_metadata, "test_file_metadata.xml")

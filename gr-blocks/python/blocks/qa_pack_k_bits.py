@@ -4,10 +4,21 @@
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 #
-
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
+#
 
 import random
 
@@ -16,7 +27,6 @@ from gnuradio import gr, gr_unittest, blocks
 class test_pack(gr_unittest.TestCase):
 
     def setUp(self):
-        random.seed(0)
         self.tb = gr.top_block()
 
     def tearDown(self):
@@ -44,7 +54,7 @@ class test_pack(gr_unittest.TestCase):
         self.assertEqual(expected_results, dst.data())
 
     def test_003(self):
-        src_data = expected_results = [random.randint(0,3) for x in range(10)];
+        src_data = expected_results = map(lambda x: random.randint(0,3), range(10));
         src = blocks.vector_source_b( src_data );
         pack = blocks.pack_k_bits_bb(2);
         unpack = blocks.unpack_k_bits_bb(2);
@@ -52,7 +62,7 @@ class test_pack(gr_unittest.TestCase):
         self.tb.connect(src,unpack,pack,snk);
         self.tb.run()
         self.assertEqual(list(expected_results), list(snk.data()));
-
+        
 if __name__ == '__main__':
    gr_unittest.run(test_pack, "test_pack.xml")
 

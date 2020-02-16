@@ -4,16 +4,28 @@
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 #
-
-from __future__ import print_function
-
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
+#
 
 from gnuradio import gr, gr_unittest
-import pmt
 
+try:
+    import pmt_swig as pmt
+except ImportError:
+    import pmt
 
 class test_tag_utils (gr_unittest.TestCase):
 
@@ -64,41 +76,9 @@ class test_tag_utils (gr_unittest.TestCase):
         self.assertTrue(pmt.equal(t_tuple.value, value))
         self.assertEqual(t_tuple.offset, offset)
 
-    def test_003(self):
-        offsets = (6, 3, 8)
-        key = pmt.string_to_symbol('key')
-        srcid = pmt.string_to_symbol('qa_tag_utils')
-        tags = []
-
-        for k in offsets:
-            t = gr.tag_t()
-            t.offset = k
-            t.key = key
-            t.value = pmt.from_long(k)
-            t.srcid = srcid
-            tags.append(t)
-
-        for k, t in zip(sorted(offsets),
-                        sorted(tags, key=gr.tag_t_offset_compare_key())):
-            self.assertEqual(t.offset, k)
-            self.assertTrue(pmt.equal(t.key, key))
-            self.assertTrue(pmt.equal(t.value, pmt.from_long(k)))
-            self.assertTrue(pmt.equal(t.srcid, srcid))
-
-        tmin = min(tags, key=gr.tag_t_offset_compare_key())
-        self.assertEqual(tmin.offset, min(offsets))
-        self.assertTrue(pmt.equal(tmin.key, key))
-        self.assertTrue(pmt.equal(tmin.value, pmt.from_long(min(offsets))))
-        self.assertTrue(pmt.equal(tmin.srcid, srcid))
-
-        tmax = max(tags, key=gr.tag_t_offset_compare_key())
-        self.assertEqual(tmax.offset, max(offsets))
-        self.assertTrue(pmt.equal(tmax.key, key))
-        self.assertTrue(pmt.equal(tmax.value, pmt.from_long(max(offsets))))
-        self.assertTrue(pmt.equal(tmax.srcid, srcid))
 
 
 if __name__ == '__main__':
-    print('hi')
+    print 'hi'
     gr_unittest.run(test_tag_utils, "test_tag_utils.xml")
 

@@ -4,8 +4,20 @@
  *
  * This file is part of GNU Radio
  *
- * SPDX-License-Identifier: GPL-3.0-or-later
+ * GNU Radio is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3, or (at your option)
+ * any later version.
  *
+ * GNU Radio is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with GNU Radio; see the file COPYING.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street,
+ * Boston, MA 02110-1301, USA.
  */
 
 #ifndef INCLUDED_GR_RUNTIME_TAGGED_STREAM_BLOCK_H
@@ -16,27 +28,25 @@
 
 namespace gr {
 
-/*!
- * \brief Block that operates on PDUs in form of tagged streams
- * \ingroup base_blk
- *
- * Override work to provide the signal processing implementation.
- */
-class GR_RUNTIME_API tagged_stream_block : public block
-{
-private:
-    pmt::pmt_t
-        d_length_tag_key; //!< This is the key for the tag that stores the PDU length
-    gr_vector_int
-        d_n_input_items_reqd; //!< How many input items do I need to process the next PDU?
+  /*!
+   * \brief Block that operates on PDUs in form of tagged streams
+   * \ingroup base_blk
+   *
+   * Override work to provide the signal processing implementation.
+   */
+  class GR_RUNTIME_API tagged_stream_block : public block
+  {
+  private:
+    pmt::pmt_t d_length_tag_key; //!< This is the key for the tag that stores the PDU length
+    gr_vector_int d_n_input_items_reqd; //!< How many input items do I need to process the next PDU?
 
-protected:
+  protected:
     std::string d_length_tag_key_str;
     tagged_stream_block(void) {} // allows pure virtual interface sub-classes
-    tagged_stream_block(const std::string& name,
+    tagged_stream_block(const std::string &name,
                         gr::io_signature::sptr input_signature,
                         gr::io_signature::sptr output_signature,
-                        const std::string& length_tag_key);
+                        const std::string &length_tag_key);
 
     /*!
      * \brief Parse all tags on the first sample of a PDU, return the
@@ -47,16 +57,15 @@ protected:
      *
      * Default behaviour:
      * - Go through all input ports
-     * - On every input port, search for the tag with the key specified in \p
-     * length_tag_key
+     * - On every input port, search for the tag with the key specified in \p length_tag_key
      * - Copy that value as an int to the corresponding position in \p n_input_items_reqd
      * - Remove the length tag.
      *
      * \param[in] tags All the tags found on the first item of every input port.
      * \param[out] n_input_items_reqd Number of items which will be read from every input
      */
-    virtual void parse_length_tags(const std::vector<std::vector<tag_t>>& tags,
-                                   gr_vector_int& n_input_items_reqd);
+    virtual void parse_length_tags(const std::vector<std::vector<tag_t> > &tags,
+                                   gr_vector_int &n_input_items_reqd);
 
     /*!
      * \brief Calculate the number of output items.
@@ -68,7 +77,7 @@ protected:
      * You most likely need to override this function, unless your
      * block is a sync block or integer interpolator/decimator.
      */
-    virtual int calculate_output_stream_length(const gr_vector_int& ninput_items);
+    virtual int calculate_output_stream_length(const gr_vector_int &ninput_items);
 
     /*!
      * \brief Set the new length tags on the output stream
@@ -83,12 +92,10 @@ protected:
      */
     virtual void update_length_tags(int n_produced, int n_ports);
 
-public:
+  public:
     /*! \brief Don't override this.
      */
-    void /* final */ forecast(int noutput_items, gr_vector_int& ninput_items_required);
-
-    bool check_topology(int ninputs, int /* noutputs */);
+    void /* final */ forecast (int noutput_items, gr_vector_int &ninput_items_required);
 
     /*!
      * - Reads the number of input items from the tags using parse_length_tags()
@@ -98,9 +105,9 @@ public:
      * - Updates the tags using update_length_tags()
      */
     int general_work(int noutput_items,
-                     gr_vector_int& ninput_items,
-                     gr_vector_const_void_star& input_items,
-                     gr_vector_void_star& output_items);
+		     gr_vector_int &ninput_items,
+		     gr_vector_const_void_star &input_items,
+		     gr_vector_void_star &output_items);
 
     /*!
      * \brief Just like gr::block::general_work, but makes sure the input is valid
@@ -120,16 +127,18 @@ public:
      * do anything here.
      *
      * \param noutput_items The size of the writable output buffer
-     * \param ninput_items The exact size of the items on every input for this particular
-     * PDU. These will be consumed if a length tag key is provided! \param input_items See
-     * gr::block \param output_items See gr::block
+     * \param ninput_items The exact size of the items on every input for this particular PDU.
+     *                     These will be consumed if a length tag key is provided!
+     * \param input_items See gr::block
+     * \param output_items See gr::block
      */
     virtual int work(int noutput_items,
-                     gr_vector_int& ninput_items,
-                     gr_vector_const_void_star& input_items,
-                     gr_vector_void_star& output_items) = 0;
-};
+                     gr_vector_int &ninput_items,
+                     gr_vector_const_void_star &input_items,
+                     gr_vector_void_star &output_items) = 0;
+  };
 
-} /* namespace gr */
+}  /* namespace gr */
 
 #endif /* INCLUDED_GR_RUNTIME_TAGGED_STREAM_BLOCK_H */
+

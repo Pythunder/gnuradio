@@ -1,12 +1,9 @@
 #!/usr/bin/env python
 
-from __future__ import print_function
-from __future__ import unicode_literals
 from gnuradio import gr
 from gnuradio import blocks
 import argparse
-from volk_test_funcs import (create_connection, new_table, replace_results,
-                             helper, timeit, format_results)
+from volk_test_funcs import *
 
 ######################################################################
 
@@ -108,7 +105,7 @@ def run_tests(func, N, iters):
         res = format_results(func.__name__, t)
         return res
     except AttributeError:
-        print("\tCould not run test. Skipping.")
+        print "\tCould not run test. Skipping."
         return None
 
 def main():
@@ -146,7 +143,7 @@ def main():
                         default=20,
                         help='Number of iterations [default: %(default)s]')
     parser.add_argument('--tests', type=int, nargs='*',
-                        choices=list(range(len(avail_tests))),
+                        choices=xrange(len(avail_tests)),
                         help='A list of tests to run; can be a single test or a \
                               space-separated list.')
     parser.add_argument('--list', action='store_true',
@@ -156,8 +153,8 @@ def main():
     args = parser.parse_args()
 
     if(args.list):
-        print("Available Tests to Run:")
-        print("\n".join(["\t{0}: {1}".format(i,f.__name__) for i,f in enumerate(avail_tests)]))
+        print "Available Tests to Run:"
+        print "\n".join(["\t{0}: {1}".format(i,f.__name__) for i,f in enumerate(avail_tests)])
         sys.exit(0)
 
     N = int(args.nitems)
@@ -168,7 +165,7 @@ def main():
     new_table(conn, label)
 
     if args.all:
-        tests = list(range(len(avail_tests)))
+        tests = xrange(len(avail_tests))
     else:
         tests = args.tests
 

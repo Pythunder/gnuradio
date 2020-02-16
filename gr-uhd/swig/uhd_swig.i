@@ -1,11 +1,23 @@
 /* -*- c++ -*- */
 /*
- * Copyright 2010-2014 Free Software Foundation, Inc.
+ * Copyright 2010-2013 Free Software Foundation, Inc.
  *
  * This file is part of GNU Radio
  *
- * SPDX-License-Identifier: GPL-3.0-or-later
+ * GNU Radio is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3, or (at your option)
+ * any later version.
  *
+ * GNU Radio is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with GNU Radio; see the file COPYING.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street,
+ * Boston, MA 02110-1301, USA.
  */
 
 // Defined during configure; avoids trying to locate
@@ -13,8 +25,6 @@
 #ifdef GR_HAVE_UHD
 
 #define GR_UHD_API
-
-#include <uhd/version.hpp>
 
 //suppress 319. No access specifier given for base class name (ignored).
 #pragma SWIG nowarn=319
@@ -30,12 +40,6 @@
 %include "uhd_swig_doc.i"
 
 ////////////////////////////////////////////////////////////////////////
-// SWIG should not see the uhd::usrp::multi_usrp class
-////////////////////////////////////////////////////////////////////////
-%ignore gr::uhd::usrp_sink::get_device;
-%ignore gr::uhd::usrp_source::get_device;
-
-////////////////////////////////////////////////////////////////////////
 // block headers
 ////////////////////////////////////////////////////////////////////////
 %{
@@ -43,8 +47,6 @@
 #include <gnuradio/uhd/usrp_sink.h>
 #include <gnuradio/uhd/amsg_source.h>
 %}
-
-%include "gnuradio/uhd/usrp_block.h"
 
 ////////////////////////////////////////////////////////////////////////
 // used types
@@ -69,12 +71,16 @@
 
 %include <uhd/types/device_addr.hpp>
 
+%include <uhd/types/io_type.hpp>
+
 %template(range_vector_t) std::vector<uhd::range_t>; //define before range
 %include <uhd/types/ranges.hpp>
 
 %include <uhd/types/tune_request.hpp>
 
 %include <uhd/types/tune_result.hpp>
+
+%include <uhd/types/io_type.hpp>
 
 %include <uhd/types/time_spec.hpp>
 
@@ -91,13 +97,11 @@
         temp -= what;
         return temp;
     }
-    bool __eq__(const uhd::time_spec_t &what)
-    {
-      return (what == *self);
-    }
 };
 
 %include <uhd/types/stream_cmd.hpp>
+
+%include <uhd/types/clock_config.hpp>
 
 %include <uhd/types/metadata.hpp>
 
@@ -107,77 +111,14 @@
 
 %include <uhd/stream.hpp>
 
-%include <uhd/types/filters.hpp>
-
-%include stdint.i
-
-// Used for lists of filter taps
-%template(uhd_vector_int16_t) std::vector<int16_t>;
-
 ////////////////////////////////////////////////////////////////////////
 // swig dboard_iface for python access
 ////////////////////////////////////////////////////////////////////////
+%include stdint.i
 %include <uhd/types/serial.hpp>
 %include <uhd/usrp/dboard_iface.hpp>
 
-#if UHD_VERSION < 4000000 
-
-%template(filter_info_base_sptr) boost::shared_ptr<uhd::filter_info_base>;
-%template(analog_filter_base_stpr) boost::shared_ptr<uhd::analog_filter_base>;
-%template(analog_filter_lp_stpr) boost::shared_ptr<uhd::analog_filter_lp>;
-%template(digital_filter_base_int16_t_sptr) boost::shared_ptr<uhd::digital_filter_base<int16_t>>;
-%template(digital_filter_fir_int16_t_sptr) boost::shared_ptr<uhd::digital_filter_fir<int16_t>>;
-
-%extend uhd::filter_info_base{
-    boost::shared_ptr<uhd::analog_filter_base> to_analog_info_base(boost::shared_ptr<uhd::filter_info_base> ptr) {
-       return boost::dynamic_pointer_cast<uhd::analog_filter_base>(ptr);
-    }
-
-    boost::shared_ptr<uhd::analog_filter_lp> to_analog_filter_lp(boost::shared_ptr<uhd::filter_info_base> ptr) {
-       return boost::dynamic_pointer_cast<uhd::analog_filter_lp>(ptr);
-    }
-
-    boost::shared_ptr<uhd::digital_filter_base<int16_t>> to_digital_filter_base_int16(boost::shared_ptr<uhd::filter_info_base> ptr) {
-       return boost::dynamic_pointer_cast<uhd::digital_filter_base<int16_t>>(ptr);
-    }
-
-    boost::shared_ptr<uhd::digital_filter_fir<int16_t>> to_digital_filter_fir_int16(boost::shared_ptr<uhd::filter_info_base> ptr) {
-       return boost::dynamic_pointer_cast<uhd::digital_filter_fir<int16_t>>(ptr);
-    }
-}
-
 %template(dboard_iface_sptr) boost::shared_ptr<uhd::usrp::dboard_iface>;
-
-#else
-
-%template(filter_info_base_sptr) std::shared_ptr<uhd::filter_info_base>;
-%template(analog_filter_base_stpr) std::shared_ptr<uhd::analog_filter_base>;
-%template(analog_filter_lp_stpr) std::shared_ptr<uhd::analog_filter_lp>;
-%template(digital_filter_base_int16_t_sptr) std::shared_ptr<uhd::digital_filter_base<int16_t>>;
-%template(digital_filter_fir_int16_t_sptr) std::shared_ptr<uhd::digital_filter_fir<int16_t>>;
-
-%extend uhd::filter_info_base{
-    std::shared_ptr<uhd::analog_filter_base> to_analog_info_base(std::shared_ptr<uhd::filter_info_base> ptr) {
-       return std::dynamic_pointer_cast<uhd::analog_filter_base>(ptr);
-    }
-
-    std::shared_ptr<uhd::analog_filter_lp> to_analog_filter_lp(std::shared_ptr<uhd::filter_info_base> ptr) {
-       return std::dynamic_pointer_cast<uhd::analog_filter_lp>(ptr);
-    }
-
-    std::shared_ptr<uhd::digital_filter_base<int16_t>> to_digital_filter_base_int16(std::shared_ptr<uhd::filter_info_base> ptr) {
-       return std::dynamic_pointer_cast<uhd::digital_filter_base<int16_t>>(ptr);
-    }
-
-    std::shared_ptr<uhd::digital_filter_fir<int16_t>> to_digital_filter_fir_int16(std::shared_ptr<uhd::filter_info_base> ptr) {
-       return std::dynamic_pointer_cast<uhd::digital_filter_fir<int16_t>>(ptr);
-    }
-
-%template(dboard_iface_sptr) std::shared_ptr<uhd::usrp::dboard_iface>;
-
-}
-
-#endif
 
 ////////////////////////////////////////////////////////////////////////
 // block magic
@@ -206,20 +147,8 @@ static uhd::device_addrs_t find_devices_raw(const uhd::device_addr_t &dev_addr =
 ////////////////////////////////////////////////////////////////////////
 %{
 static const size_t ALL_MBOARDS = uhd::usrp::multi_usrp::ALL_MBOARDS;
-static const size_t ALL_CHANS = uhd::usrp::multi_usrp::ALL_CHANS;
-static const std::string ALL_GAINS = uhd::usrp::multi_usrp::ALL_GAINS;
-
-#ifdef UHD_USRP_MULTI_USRP_LO_CONFIG_API
-static const std::string ALL_LOS = uhd::usrp::multi_usrp::ALL_LOS;
-#else
-static const std::string ALL_LOS;
-#endif
 %}
-
 static const size_t ALL_MBOARDS;
-static const size_t ALL_CHANS;
-static const std::string ALL_GAINS;
-static const std::string ALL_LOS;
 
 %{
 #include <uhd/version.hpp>

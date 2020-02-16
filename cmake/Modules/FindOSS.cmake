@@ -4,11 +4,6 @@
 #  OSS_INCLUDE_DIR  -  where to find soundcard.h, etc.
 #  OSS_FOUND        - True if Oss found.
 
-# OSS is not for APPLE or WINDOWS
-
-IF(APPLE OR WIN32)
-  RETURN()
-ENDIF()
 
 FIND_PATH(LINUX_OSS_INCLUDE_DIR "linux/soundcard.h"
   "/usr/include" "/usr/local/include"
@@ -48,12 +43,4 @@ MARK_AS_ADVANCED (
 	LINUX_OSS_INCLUDE_DIR
 	SYS_OSS_INCLUDE_DIR
 	MACHINE_OSS_INCLUDE_DIR
-  )
-
-
-if (OSS_FOUND AND NOT TARGET OSS::OSS)
-  add_library(OSS::OSS INTERFACE IMPORTED)
-  set_target_properties(OSS::OSS PROPERTIES
-    INTERFACE_INCLUDE_DIRECTORIES "${OSS_INCLUDE_DIRS}"
-  )
-endif()
+)

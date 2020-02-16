@@ -3,8 +3,20 @@
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
 #
 
 '''
@@ -15,13 +27,8 @@ For a great intro to how all this stuff works, see section 6.6 of
 and Barrie W. Jervis, Adison-Wesley, 1993.  ISBN 0-201-54413-X.
 '''
 
-from __future__ import print_function
-from __future__ import division
-from __future__ import unicode_literals
-
-
 import math, cmath
-from . import filter_swig as filter
+import filter_swig as filter
 
 # ----------------------------------------------------------------
 
@@ -29,7 +36,7 @@ def low_pass (gain, Fs, freq1, freq2, passband_ripple_db, stopband_atten_db,
               nextra_taps=2):
     """
     Builds a low pass filter.
-
+    
     Args:
         gain: Filter gain in the passband (linear)
         Fs: Sampling rate (sps)
@@ -53,7 +60,7 @@ def band_pass (gain, Fs, freq_sb1, freq_pb1, freq_pb2, freq_sb2,
                nextra_taps=2):
     """
     Builds a band pass filter.
-
+    
     Args:
         gain: Filter gain in the passband (linear)
         Fs: Sampling rate (sps)
@@ -82,7 +89,7 @@ def complex_band_pass (gain, Fs, freq_sb1, freq_pb1, freq_pb2, freq_sb2,
     """
     Builds a band pass filter with complex taps by making an LPF and
     spinning it up to the right center frequency
-
+    
     Args:
         gain: Filter gain in the passband (linear)
         Fs: Sampling rate (sps)
@@ -95,11 +102,11 @@ def complex_band_pass (gain, Fs, freq_sb1, freq_pb1, freq_pb2, freq_sb2,
         nextra_taps: Extra taps to use in the filter (default=2)
     """
     center_freq = (freq_pb2 + freq_pb1) / 2.0
-    lp_pb = (freq_pb2 - center_freq) / 1.0
+    lp_pb = (freq_pb2 - center_freq)/1.0
     lp_sb = freq_sb2 - center_freq
     lptaps = low_pass(gain, Fs, lp_pb, lp_sb, passband_ripple_db,
                       stopband_atten_db, nextra_taps)
-    spinner = [cmath.exp(2j*cmath.pi*center_freq/Fs*i) for i in range(len(lptaps))]
+    spinner = [cmath.exp(2j*cmath.pi*center_freq/Fs*i) for i in xrange(len(lptaps))]
     taps = [s*t for s,t in zip(spinner, lptaps)]
     return taps
 
@@ -110,7 +117,7 @@ def band_reject (gain, Fs, freq_pb1, freq_sb1, freq_sb2, freq_pb2,
     """
     Builds a band reject filter
     spinning it up to the right center frequency
-
+    
     Args:
         gain: Filter gain in the passband (linear)
         Fs: Sampling rate (sps)
@@ -141,7 +148,7 @@ def high_pass (gain, Fs, freq1, freq2, passband_ripple_db, stopband_atten_db,
                nextra_taps=2):
     """
     Builds a high pass filter.
-
+    
     Args:
         gain: Filter gain in the passband (linear)
         Fs: Sampling rate (sps)
@@ -169,11 +176,11 @@ def high_pass (gain, Fs, freq1, freq2, passband_ripple_db, stopband_atten_db,
 
 def stopband_atten_to_dev (atten_db):
     """Convert a stopband attenuation in dB to an absolute value"""
-    return 10**(-atten_db / 20)
+    return 10**(-atten_db/20)
 
 def passband_ripple_to_dev (ripple_db):
     """Convert passband ripple spec expressed in dB to an absolute value"""
-    return (10**(ripple_db / 20)-1)/(10**(ripple_db / 20)+1)
+    return (10**(ripple_db/20)-1)/(10**(ripple_db/20)+1)
 
 # ----------------------------------------------------------------
 
@@ -230,10 +237,10 @@ def remezord (fcuts, mags, devs, fsamp = 2):
     nbands = nm
 
     if nm != nd:
-        raise ValueError("Length of mags and devs must be equal")
+        raise ValueError, "Length of mags and devs must be equal"
 
     if nf != 2 * (nbands - 1):
-        raise ValueError("Length of f must be 2 * len (mags) - 2")
+        raise ValueError, "Length of f must be 2 * len (mags) - 2"
 
     for i in range (len (mags)):
         if mags[i] != 0:                        # if not stopband, get relative deviation
@@ -290,7 +297,7 @@ def lporder (freq1, freq2, delta_p, delta_s):
     deviation (ripple), delta_s is the stopband deviation (ripple).
 
     Note, this works for high pass filters too (freq1 > freq2), but
-    doesn't work well if the transition is near f == 0 or f == fs/2
+    doesnt work well if the transition is near f == 0 or f == fs/2
 
     From Herrmann et al (1973), Practical design rules for optimum
     finite impulse response filters.  Bell System Technical J., 52, 769-99
@@ -348,3 +355,4 @@ def bporder (freq1, freq2, delta_p, delta_s):
     ginf = -14.6 * math.log10 (delta_p / delta_s) - 16.9
     n = cinf / df + ginf * df + 1
     return n
+

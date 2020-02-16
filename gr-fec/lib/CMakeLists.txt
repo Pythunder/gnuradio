@@ -1,17 +1,55 @@
-# Copyright 2012-2014,2019 Free Software Foundation, Inc.
+# Copyright 2012-2014 Free Software Foundation, Inc.
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
 
 # These are convenience libraries of 3rd party code.
 # Change to test for distro provided packages
+GR_INCLUDE_SUBDIRECTORY(reed-solomon)
+GR_INCLUDE_SUBDIRECTORY(viterbi)
+
+########################################################################
+# Setup the include and linker paths
+########################################################################
+include_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR}
+    ${GR_FEC_INCLUDE_DIRS}
+    ${GR_BLOCKS_INCLUDE_DIRS}
+    ${GNURADIO_RUNTIME_INCLUDE_DIRS}
+    ${VOLK_INCLUDE_DIRS}
+    ${LOG4CPP_INCLUDE_DIRS}
+    ${Boost_INCLUDE_DIRS}
+)
+
+if(ENABLE_GR_CTRLPORT)
+  ADD_DEFINITIONS(-DGR_CTRLPORT)
+  include_directories(${ICE_INCLUDE_DIR})
+endif(ENABLE_GR_CTRLPORT)
+
+link_directories(
+  ${Boost_LIBRARY_DIRS}
+  ${LOG4CPP_LIBRARY_DIRS}
+)
 
 ########################################################################
 # Setup library
 ########################################################################
-add_library(gnuradio-fec
+list(APPEND gnuradio_fec_sources
   generic_decoder.cc
   generic_encoder.cc
   decoder_impl.cc
@@ -29,43 +67,13 @@ add_library(gnuradio-fec
   repetition_encoder_impl.cc
   decode_ccsds_27_fb_impl.cc
   encode_ccsds_27_bb_impl.cc
+  ber_tools.cc
   ber_bf_impl.cc
   conv_bit_corr_bb_impl.cc
   puncture_bb_impl.cc
   puncture_ff_impl.cc
   depuncture_bb_impl.cc
-  ldpc_encoder_impl.cc
-  ldpc_decoder.cc
-  cldpc.cc
-  awgn_bp.cc
-  gf2vec.cc
-  gf2mat.cc
-  alist.cc
-  tpc_common.cc
-  tpc_decoder.cc
-  tpc_encoder.cc
-  polar_encoder.cc
-  polar_decoder_sc.cc
-  polar_common.cc
-  polar_decoder_sc_list.cc
-  polar_decoder_common.cc
-  scl_list.cc
-  polar_encoder_systematic.cc
-  polar_decoder_sc_systematic.cc
-  )
-target_include_directories(gnuradio-fec
-  PUBLIC
-  $<INSTALL_INTERFACE:include>
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
-  )
-
-add_subdirectory(reed-solomon)
-
-target_sources(gnuradio-fec PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/viterbi/metrics.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/viterbi/tab.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/viterbi/viterbi.cc
-  )
+)
 
 #Add Windows DLL resource file if using MSVC
 if(MSVC)
@@ -76,29 +84,19 @@ if(MSVC)
         ${CMAKE_CURRENT_BINARY_DIR}/gnuradio-fec.rc
     @ONLY)
 
-    target_sources(gnuradio-fec PRIVATE
+    list(APPEND gnuradio_fec_sources
         ${CMAKE_CURRENT_BINARY_DIR}/gnuradio-fec.rc
     )
 endif(MSVC)
 
-target_link_libraries(gnuradio-fec PUBLIC
-    gnuradio-runtime
+list(APPEND gnuradio_fec_libs
     gnuradio-blocks
+    gnuradio-runtime
+    volk
+    ${Boost_LIBRARIES}
+    ${LOG4CPP_LIBRARIES}
 )
 
-# Only include the LDPC work if we have GSL installed
-if(GSL_FOUND)
-  target_link_libraries(gnuradio-fec PUBLIC gsl::gsl)
-  target_sources(gnuradio-fec PRIVATE
-    ldpc_bit_flip_decoder_impl.cc
-    ldpc_par_mtrx_encoder_impl.cc
-    ldpc_gen_mtrx_encoder_impl.cc
-    ldpc_H_matrix_impl.cc
-    ldpc_G_matrix_impl.cc
-    fec_mtrx_impl.cc
-    )
-endif(GSL_FOUND)
-
-if(BUILD_SHARED_LIBS)
-  GR_LIBRARY_FOO(gnuradio-fec)
-endif()
+add_library(gnuradio-fec SHARED ${gnuradio_fec_sources})
+target_link_libraries(gnuradio-fec ${gnuradio_fec_libs})
+GR_LIBRARY_FOO(gnuradio-fec RUNTIME_COMPONENT "fec_runtime" DEVEL_COMPONENT "fec_devel")

@@ -1,17 +1,26 @@
-from __future__ import unicode_literals
 #
 # Copyright 2008 Free Software Foundation, Inc.
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
 #
 
+import blocks_swig as blocks
 from gnuradio import gr
-
-from . import blocks_swig as blocks
-
 
 class stream_to_vector_decimator(gr.hier_block2):
     """
@@ -21,7 +30,7 @@ class stream_to_vector_decimator(gr.hier_block2):
     def __init__(self, item_size, sample_rate, vec_rate, vec_len):
         """
         Create the block chain.
-
+        
         Args:
             item_size: the number of bytes per sample
             sample_rate: the rate of incoming samples
@@ -44,7 +53,7 @@ class stream_to_vector_decimator(gr.hier_block2):
     def set_sample_rate(self, sample_rate):
         """
         Set the new sampling rate and update the decimator.
-
+        
         Args:
             sample_rate: the new rate
         """
@@ -54,7 +63,7 @@ class stream_to_vector_decimator(gr.hier_block2):
     def set_vec_rate(self, vec_rate):
         """
         Set the new vector rate and update the decimator.
-
+        
         Args:
             vec_rate: the new rate
         """
@@ -64,7 +73,7 @@ class stream_to_vector_decimator(gr.hier_block2):
     def set_decimation(self, decim):
         """
         Set the decimation parameter directly.
-
+        
         Args:
             decim: the new decimation
         """

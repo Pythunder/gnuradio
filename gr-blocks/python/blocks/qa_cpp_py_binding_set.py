@@ -1,26 +1,38 @@
 #!/usr/bin/env python
 #
-# Copyright 2012,2013,2015 Free Software Foundation, Inc.
+# Copyright 2012,2013 Free Software Foundation, Inc.
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
 #
 
-#
+# 
 # This program tests mixed python and c++ GRCP sets in a single app
 #
 
-
-import sys, time, random, numpy, re
+import Ice
+import sys, time, random, numpy
 from gnuradio import gr, gr_unittest, blocks
 
 from gnuradio.ctrlport import GNURadio
 from gnuradio import ctrlport
 import os
 
-class inc_class(object):
+class inc_class:
     def __init__(self,val):
         self.val = val;
 
@@ -97,7 +109,7 @@ class test_cpp_py_binding_set(gr_unittest.TestCase):
 
 
     def test_002(self):
-        data = list(range(1, 10))
+        data = range(1, 10)
 
         self.src = blocks.vector_source_c(data, True)
         self.p = blocks.nop(gr.sizeof_gr_complex)
@@ -108,13 +120,11 @@ class test_cpp_py_binding_set(gr_unittest.TestCase):
 
         # Get available endpoint
         ep = gr.rpcmanager_get().endpoints()[0]
-        hostname = re.search(r"-h (\S+|\d+\.\d+\.\d+\.\d+)", ep).group(1)
-        portnum = re.search(r"-p (\d+)", ep).group(1)
 
-        # Initialize a simple ControlPort client from endpoint
-        from gnuradio.ctrlport.GNURadioControlPortClient import GNURadioControlPortClient
-        radiosys = GNURadioControlPortClient(hostname, portnum, rpcmethod='thrift')
-        radio = radiosys.client
+        # Initialize a simple Ice client from endpoint
+        ic = Ice.initialize(sys.argv)
+        base = ic.stringToProxy(ep)
+        radio = GNURadio.ControlPortPrx.checkedCast(base)
 
         self.tb.start()
 
@@ -123,12 +133,12 @@ class test_cpp_py_binding_set(gr_unittest.TestCase):
 
         # Get all exported knobs
         key_name_test = probe_info+"::test"
-        ret = radio.getKnobs([key_name_test,])
+        ret = radio.get([key_name_test,])
 
         ret[key_name_test].value = 10
-        radio.setKnobs({key_name_test: ret[key_name_test]})
+        radio.set({key_name_test: ret[key_name_test]})
 
-        ret = radio.getKnobs([])
+        ret = radio.get([])
         result_test = ret[key_name_test].value
         self.assertEqual(result_test, 10)
 
@@ -137,3 +147,4 @@ class test_cpp_py_binding_set(gr_unittest.TestCase):
 
 if __name__ == '__main__':
     gr_unittest.run(test_cpp_py_binding_set, "test_cpp_py_binding_set.xml")
+

@@ -4,24 +4,34 @@
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 #
-
-from __future__ import division
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
+#
 
 from gnuradio import gr, gr_unittest, filter, blocks
 
 import math
 
 def sin_source_f(samp_rate, freq, amp, N):
-    t = [float(x) / samp_rate for x in range(N)]
-    y = [math.sin(2.*math.pi*freq*x) for x in t]
+    t = map(lambda x: float(x)/samp_rate, xrange(N))
+    y = map(lambda x: math.sin(2.*math.pi*freq*x), t)
     return y
 
 def cos_source_f(samp_rate, freq, amp, N):
-    t = [float(x) / samp_rate for x in range(N)]
-    y = [math.cos(2.*math.pi*freq*x) for x in t]
+    t = map(lambda x: float(x)/samp_rate, xrange(N))
+    y = map(lambda x: math.cos(2.*math.pi*freq*x), t)
     return y
 
 def fir_filter(x, taps, delay):
@@ -68,7 +78,7 @@ class test_filter_delay_fc(gr_unittest.TestCase):
         taps = filter.firdes.hilbert(ntaps, filter.firdes.WIN_HAMMING)
         hd = filter.filter_delay_fc(taps)
 
-        expected_result = fir_filter(data, taps, (ntaps-1) // 2)
+        expected_result = fir_filter(data, taps, (ntaps-1)/2)
 
         tb.connect(src1, hd)
         tb.connect(hd, dst2)
@@ -96,7 +106,7 @@ class test_filter_delay_fc(gr_unittest.TestCase):
         taps = filter.firdes.hilbert(ntaps, filter.firdes.WIN_HAMMING)
         hd = filter.filter_delay_fc(taps)
 
-        expected_result = fir_filter2(data, data, taps, (ntaps-1) // 2)
+        expected_result = fir_filter2(data, data, taps, (ntaps-1)/2)
 
         tb.connect(src1, (hd,0))
         tb.connect(src1, (hd,1))
@@ -125,7 +135,7 @@ class test_filter_delay_fc(gr_unittest.TestCase):
         taps = filter.firdes.hilbert(ntaps, filter.firdes.WIN_HAMMING)
         hd = filter.filter_delay_fc(taps)
 
-        expected_result = fir_filter2(data1, data2, taps, (ntaps-1) // 2)
+        expected_result = fir_filter2(data1, data2, taps, (ntaps-1)/2)
 
         dst2 = blocks.vector_sink_c()
 

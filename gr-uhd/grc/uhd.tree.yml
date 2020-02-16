@@ -1,5 +1,0 @@
-'[Core]':
-- UHD:
-  - uhd_usrp_source
-  - uhd_usrp_sink
-  - uhd_amsg_source

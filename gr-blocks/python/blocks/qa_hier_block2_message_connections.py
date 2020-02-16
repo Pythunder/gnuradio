@@ -4,10 +4,21 @@
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 #
-
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
+#
 
 import weakref
 
@@ -42,9 +53,9 @@ class hier_block_with_message_output(gr.hier_block2):
             "hier_block_with_message_output",
             gr.io_signature(0, 0, 0),  # Input signature
             gr.io_signature(0, 0, 0))  # Output signature
-        self.message_port_register_hier_out("test")
+        self.message_port_register_hier_in("test")
         self.block = block_with_message_output()
-        self.msg_connect(self.block, "test", self, "test")
+        self.msg_connect(self.block, "test", weakref.proxy(self), "test")
 
 
 class hier_block_with_message_input(gr.hier_block2):
@@ -54,9 +65,9 @@ class hier_block_with_message_input(gr.hier_block2):
             "hier_block_with_message_output",
             gr.io_signature(0, 0, 0),  # Input signature
             gr.io_signature(0, 0, 0))  # Output signature
-        self.message_port_register_hier_in("test")
+        self.message_port_register_hier_out("test")
         self.block = block_with_message_input()
-        self.msg_connect(self, "test", self.block, "test")
+        self.msg_connect(weakref.proxy(self), "test", self.block, "test")
 
 
 class hier_block_with_message_inout(gr.hier_block2):
@@ -66,10 +77,10 @@ class hier_block_with_message_inout(gr.hier_block2):
             "hier_block_with_message_inout",
             gr.io_signature(0, 0, 0),  # Input signature
             gr.io_signature(0, 0, 0))  # Output signature
-        self.message_port_register_hier_in("test")
         self.message_port_register_hier_out("test")
+        self.message_port_register_hier_in("test")
         self.input = block_with_message_input()
-        self.msg_connect(self, "test", self.input, "test")
+        self.msg_connect(weakref.proxy(self), "test", self.input, "test")
         self.output = block_with_message_output()
         self.msg_connect(self.output, "test", weakref.proxy(self), "test")
 
@@ -91,7 +102,7 @@ class test_hier_block2_message_connections(gr_unittest.TestCase):
             receive_port):
         """assert that the given sender block has a subscription for the given
         receiver block on the appropriate send and receive ports
-
+        
         :param sender: a block sptr to the message sender
         :param string send_port: the port messages are being sent on
         :param receiver: a block sptr to the message receiver
@@ -105,7 +116,7 @@ class test_hier_block2_message_connections(gr_unittest.TestCase):
     def assert_has_num_subscriptions(self, block, port, number):
         """assert that the given block has the given number of subscriptions
         on the given port
-
+        
         :param block: a block sptr
         :param string port: the port name
         :param number: the number of subscriptions expected

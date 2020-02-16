@@ -4,10 +4,21 @@
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 #
-
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
+#
 
 from gnuradio import gr, gr_unittest, blocks
 import math
@@ -23,7 +34,7 @@ class test_vector_map(gr_unittest.TestCase):
     def test_reversing(self):
         # Chunk data in blocks of N and reverse the block contents.
         N = 5
-        src_data = list(range(0, 20))
+        src_data = range(0, 20)
         expected_result = []
         for i in range(N-1, len(src_data), N):
             for j in range(0, N):
@@ -41,10 +52,10 @@ class test_vector_map(gr_unittest.TestCase):
         # Split an input vector into N streams.
         N = 5
         M = 20
-        src_data = list(range(0, M))
+        src_data = range(0, M)
         expected_results = []
         for n in range(0, N):
-            expected_results.append(list(range(n, M, N)))
+            expected_results.append(range(n, M, N))
         mapping = [[(0, n)] for n in range(0, N)]
         src = blocks.vector_source_f(src_data, False, N)
         vmap = blocks.vector_map(gr.sizeof_float, (N, ), mapping)
@@ -56,7 +67,7 @@ class test_vector_map(gr_unittest.TestCase):
         for n in range(0, N):
             result_data = list(dsts[n].data())
             self.assertEqual(expected_results[n], result_data)
-
+        
     def test_interleaving(self):
         # Takes 3 streams (a, b and c)
         # Outputs 2 streams.
@@ -79,8 +90,8 @@ class test_vector_map(gr_unittest.TestCase):
         dstD = blocks.vector_sink_f(2)
         dstE = blocks.vector_sink_f(4)
         self.tb.connect(srcA, (vmap, 0))
-        self.tb.connect(srcB, (vmap, 1))
-        self.tb.connect(srcC, (vmap, 2))
+        self.tb.connect(srcB, (vmap, 1)) 
+        self.tb.connect(srcC, (vmap, 2)) 
         self.tb.connect((vmap, 0), dstD)
         self.tb.connect((vmap, 1), dstE)
         self.tb.run()

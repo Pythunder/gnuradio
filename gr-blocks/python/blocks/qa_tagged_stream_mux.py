@@ -1,70 +1,106 @@
 #!/usr/bin/env python
 #
-# Copyright 2013-2014 Free Software Foundation, Inc.
+# Copyright 2013 Free Software Foundation, Inc.
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
 #
 
-
-import numpy
-import pmt
 from gnuradio import gr, gr_unittest, blocks
-from gnuradio.gr import packet_utils
+import pmt
+import numpy
 
-def make_tag(key, value, offset, srcid=None):
+def make_len_tags(tupl, key):
+    tags = []
     tag = gr.tag_t()
     tag.key = pmt.string_to_symbol(key)
-    tag.value = pmt.to_pmt(value)
+    n_read = 0
+    for element in tupl:
+        tag.offset = n_read
+        n_read += len(element)
+        tag.value = pmt.to_pmt(len(element))
+        tags.append(tag)
+    return tags
+
+def make_len_tag(offset, key, value):
+    tag = gr.tag_t()
     tag.offset = offset
-    if srcid is not None:
-        tag.srcid = pmt.to_pmt(srcid)
+    tag.key = pmt.string_to_symbol(key)
+    tag.value = pmt.to_pmt(value)
     return tag
+
 
 class qa_tagged_stream_mux (gr_unittest.TestCase):
 
     def setUp(self):
         self.tb = gr.top_block()
-        self.tsb_key = "tsb_key"
 
     def tearDown(self):
         self.tb = None
 
-    def setup_data_tags(self, data):
-        return packet_utils.packets_to_vectors(
-                data,
-                self.tsb_key
-        )
-
     def test_1(self):
-        packets0 = (
-            (0, 1, 2),  (5, 6),     (10,),         (14, 15, 16,)
+        datas = (
+            0, 1, 2,  5, 6,     10,          14, 15, 16,
+            3, 4,     7, 8, 9,  11, 12, 13,  17
         )
-        packets1 = (
-            (3, 4),     (7, 8, 9),  (11, 12, 13),  (17,)
+        expected = tuple(range(18))
+
+        tagname = "packet_length"
+        len_tags_0 = (
+            make_len_tag(0, tagname, 3),
+            make_len_tag(3, tagname, 2),
+            make_len_tag(5, tagname, 1),
+            make_len_tag(6, tagname, 3)
         )
-        expected = ((0, 1, 2, 3, 4), (5, 6, 7, 8, 9), (10, 11, 12, 13), (14, 15, 16, 17))
-        data0, tags0 = self.setup_data_tags(packets0)
-        data1, tags1 = self.setup_data_tags(packets1)
-        tags0.append(make_tag('spam', 42, 4))
-        tags1.append(make_tag('eggs', 23, 3))
-        src0 = blocks.vector_source_b(data0, tags=tags0)
-        src1 = blocks.vector_source_b(data1, tags=tags1)
-        tagged_stream_mux = blocks.tagged_stream_mux(gr.sizeof_char, self.tsb_key)
-        snk = blocks.tsb_vector_sink_b(tsb_key=self.tsb_key)
+        len_tags_1 = (
+            make_len_tag(0, tagname, 2),
+            make_len_tag(2, tagname, 3),
+            make_len_tag(5, tagname, 3),
+            make_len_tag(8, tagname, 1)
+        )
+        test_tag_0 = gr.tag_t()
+        test_tag_0.key = pmt.string_to_symbol('spam')
+        test_tag_0.offset = 4 # On the second '1'
+        test_tag_0.value = pmt.to_pmt(42)
+        test_tag_1 = gr.tag_t()
+        test_tag_1.key = pmt.string_to_symbol('eggs')
+        test_tag_1.offset = 3 # On the first '3' of the 2nd stream
+        test_tag_1.value = pmt.to_pmt(23)
+
+        src0 = blocks.vector_source_b(datas[0:9], False, 1, len_tags_0 + (test_tag_0,))
+        src1 = blocks.vector_source_b(datas[9:],  False, 1, len_tags_1 + (test_tag_1,))
+        tagged_stream_mux = blocks.tagged_stream_mux(gr.sizeof_char, tagname)
+        snk = blocks.vector_sink_b()
         self.tb.connect(src0, (tagged_stream_mux, 0))
         self.tb.connect(src1, (tagged_stream_mux, 1))
         self.tb.connect(tagged_stream_mux, snk)
         self.tb.run()
-        # Check
+
         self.assertEqual(expected, snk.data())
+
         tags = [gr.tag_to_python(x) for x in snk.tags()]
         tags = sorted([(x.offset, x.key, x.value) for x in tags])
         tags_expected = [
+                (0, 'packet_length', 5),
+                (5, 'packet_length', 5),
                 (6, 'spam', 42),
                 (8, 'eggs', 23),
+                (10, 'packet_length', 4),
+                (14, 'packet_length', 4)
         ]
         self.assertEqual(tags, tags_expected)
 
@@ -72,35 +108,35 @@ class qa_tagged_stream_mux (gr_unittest.TestCase):
         """ Test the 'preserve head position' function.
         This will add a 'special' tag to item 0 on stream 1.
         It should be on item 0 of the output stream. """
-        packet_len_0 = 5
-        data0 = list(range(packet_len_0))
-        packet_len_1 = 3
-        data1 = list(range(packet_len_1))
-        mux = blocks.tagged_stream_mux(
-                gr.sizeof_float,
-                self.tsb_key,
-                1 # Mark port 1 as carrying special tags on the head position
-        )
-        sink = blocks.tsb_vector_sink_f(tsb_key=self.tsb_key)
+        special_tag = gr.tag_t()
+        special_tag.key = pmt.string_to_symbol('spam')
+        special_tag.offset = 0
+        special_tag.value = pmt.to_pmt('eggs')
+        len_tag_key = "length"
+        packet_len_1 = 5
+        packet_len_2 = 3
+        mux = blocks.tagged_stream_mux(gr.sizeof_float, len_tag_key, 1)
+        sink = blocks.vector_sink_f()
         self.tb.connect(
-            blocks.vector_source_f(data0),
-            blocks.stream_to_tagged_stream(gr.sizeof_float, 1, packet_len_0, self.tsb_key),
+            blocks.vector_source_f(range(packet_len_1)),
+            blocks.stream_to_tagged_stream(gr.sizeof_float, 1, packet_len_1, len_tag_key),
             (mux, 0)
         )
         self.tb.connect(
-            blocks.vector_source_f(list(range(packet_len_1)), tags=(make_tag('spam', 'eggs', 0),)),
-            blocks.stream_to_tagged_stream(gr.sizeof_float, 1, packet_len_1, self.tsb_key),
+            blocks.vector_source_f(range(packet_len_2), False, 1, (special_tag,)),
+            blocks.stream_to_tagged_stream(gr.sizeof_float, 1, packet_len_2, len_tag_key),
             (mux, 1)
         )
         self.tb.connect(mux, sink)
         self.tb.run()
-        self.assertEqual(len(sink.data()), 1)
-        self.assertEqual(sink.data()[0], tuple(data0 + data1))
-        self.assertEqual(len(sink.tags()), 1)
-        tag = gr.tag_to_python(sink.tags()[0])
-        tag = (tag.offset, tag.key, tag.value)
-        tag_expected = (0, 'spam', 'eggs')
-        self.assertEqual(tag, tag_expected)
+        self.assertEqual(sink.data(), tuple(range(packet_len_1) + range(packet_len_2)))
+        tags = [gr.tag_to_python(x) for x in sink.tags()]
+        tags = sorted([(x.offset, x.key, x.value) for x in tags])
+        tags_expected = [
+                (0, 'length', packet_len_1 + packet_len_2),
+                (0, 'spam', 'eggs'),
+        ]
+        self.assertEqual(tags, tags_expected)
 
 
 if __name__ == '__main__':

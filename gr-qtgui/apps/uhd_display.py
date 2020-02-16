@@ -4,13 +4,22 @@
 #
 # This file is part of GNU Radio
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU Radio is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
 #
+# GNU Radio is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with GNU Radio; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street,
+# Boston, MA 02110-1301, USA.
 #
 
-from __future__ import print_function
-from __future__ import division
-from __future__ import unicode_literals
 from gnuradio import gr
 from gnuradio import filter
 from gnuradio import blocks
@@ -25,14 +34,14 @@ try:
     from PyQt4 import QtGui, QtCore
     import sip
 except ImportError:
-    print("Error: Program requires PyQt4 and gr-qtgui.")
+    print "Error: Program requires PyQt4 and gr-qtgui."
     sys.exit(1)
 
 try:
     from usrp_display_qtgui import Ui_MainWindow
 except ImportError:
-    print("Error: could not find usrp_display_qtgui.py:")
-    print("\t\"pyuic4 usrp_display_qtgui.ui -o usrp_display_qtgui.py\"")
+    print "Error: could not find usrp_display_qtgui.py:"
+    print "\t\"pyuic4 usrp_display_qtgui.ui -o usrp_display_qtgui.py\""
     sys.exit(1)
 
 
@@ -173,13 +182,13 @@ class my_top_block(gr.top_block):
         if options.gain is None:
             # if no gain was specified, use the mid-point in dB
             g = self.u.get_gain_range()
-            options.gain = float(g.start()+g.stop()) / 2
+            options.gain = float(g.start()+g.stop())/2
         self.set_gain(options.gain)
 
         if options.freq is None:
             # if no freq was specified, use the mid-point
             r = self.u.get_freq_range()
-            options.freq = float(r.start()+r.stop()) / 2
+            options.freq = float(r.start()+r.stop())/2
         self.set_frequency(options.freq)
 
         self._fftsize = options.fft_size
@@ -203,9 +212,9 @@ class my_top_block(gr.top_block):
         self.connect(self.u, self.amp, self.snk)
 
         if self.show_debug_info:
-            print("Bandwidth: ", self.u.get_samp_rate())
-            print("Center Freq: ", self.u.get_center_freq())
-            print("Freq Range: ", self.u.get_freq_range())
+            print "Bandwidth: ", self.u.get_samp_rate()
+            print "Center Freq: ", self.u.get_center_freq()
+            print "Freq Range: ", self.u.get_freq_range()
 
         # Get the reference pointer to the SpectrumDisplayForm QWidget
         # Wrap the pointer as a PyQt SIP object
@@ -241,7 +250,7 @@ class my_top_block(gr.top_block):
 
         try:
             self.snk.set_frequency_range(self._freq, self._bandwidth)
-        except RuntimeError:
+        except:
             pass
 
     def set_bandwidth(self, bw):
@@ -250,7 +259,7 @@ class my_top_block(gr.top_block):
 
         try:
             self.snk.set_frequency_range(self._freq, self._bandwidth)
-        except RuntimeError:
+        except:
             pass
 
     def set_amplifier_gain(self, amp):
