@@ -86,6 +86,7 @@
 %include "gnuradio/filter/pm_remez.h"
 %include "gnuradio/filter/dc_blocker_cc.h"
 %include "gnuradio/filter/dc_blocker_ff.h"
+%include "gnuradio/filter/ival_decimator.h"
 %include "gnuradio/filter/filter_delay_fc.h"
 %include "gnuradio/filter/filterbank_vcvcf.h"
 %include "gnuradio/filter/fir_filter_ccc.h"
@@ -137,6 +138,7 @@
 
 GR_SWIG_BLOCK_MAGIC2(filter, dc_blocker_cc);
 GR_SWIG_BLOCK_MAGIC2(filter, dc_blocker_ff);
+GR_SWIG_BLOCK_MAGIC2(filter, ival_decimator);
 GR_SWIG_BLOCK_MAGIC2(filter, filter_delay_fc);
 GR_SWIG_BLOCK_MAGIC2(filter, filterbank_vcvcf);
 GR_SWIG_BLOCK_MAGIC2(filter, fir_filter_ccc);

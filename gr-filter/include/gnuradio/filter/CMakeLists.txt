@@ -83,6 +83,7 @@ install(FILES
     fir_filter.h
     fir_filter_with_buffer.h
     fft_filter.h
+    ival_decimator.h
     iir_filter.h
     interpolator_taps.h
     mmse_fir_interpolator_cc.h

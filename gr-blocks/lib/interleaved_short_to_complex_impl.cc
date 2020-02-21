@@ -27,6 +27,7 @@
 #include "interleaved_short_to_complex_impl.h"
 #include "interleaved_short_array_to_complex.h"
 #include <gnuradio/io_signature.h>
+#include <volk/volk.h>
 
 namespace gr {
   namespace blocks {
