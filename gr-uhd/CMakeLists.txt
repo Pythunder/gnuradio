@@ -47,6 +47,8 @@ SET(GR_PKG_UHD_EXAMPLES_DIR ${GR_PKG_DATA_DIR}/examples/uhd)
 # Begin conditional configuration
 ########################################################################
 if(ENABLE_GR_UHD)
+message(STATUS "  UHD Version: ${UHD_VERSION}")
+message(STATUS "  UHD 4.0 RFNoC enabled: ${ENABLE_UHD_RFNOC}")
 
 ########################################################################
 # Setup CPack components
