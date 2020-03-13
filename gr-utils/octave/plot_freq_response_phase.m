@@ -21,10 +21,10 @@
 
 function plot_freq_response_db (b,...)
   if (nargin == 1)
-    ## Response of an FIR filter
+    %% Response of an FIR filter
     a = 1;
   elseif (nargin == 2)
-    ## response of an IIR filter
+    %% response of an IIR filter
     a = va_arg ();
   endif
 

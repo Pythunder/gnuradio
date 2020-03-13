@@ -19,11 +19,11 @@
 # Boston, MA 02110-1301, USA.
 #
 
-# See Altera Application Note AN455
-#
-# R  = decimation factor, 8-256
-# Fc = passband (one-sided) cutoff frequency
-# L  = number of taps
+% See Altera Application Note AN455
+%
+% R  = decimation factor, 8-256
+% Fc = passband (one-sided) cutoff frequency
+% L  = number of taps
 
 function taps = cic_comp_taps(R, Fc, L)
     M = 1;                                   %% Differential delay

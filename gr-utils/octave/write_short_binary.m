@@ -21,10 +21,10 @@
 
 function v = write_short_binary (data, filename)
 
-  ## usage: write_short_binary (data, filename)
-  ##
-  ##  open filename and write data to it as 16 bit shorts
-  ##
+  %% usage: write_short_binary (data, filename)
+  %%
+  %%  open filename and write data to it as 16 bit shorts
+  %%
 
   if ((m = nargchk (2,2,nargin)))
     usage (m);

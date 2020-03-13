@@ -21,10 +21,10 @@
 
 function v = write_float_binary (data, filename)
 
-  ## usage: write_float_binary (data, filename)
-  ##
-  ##  open filename and write data to it as 32 bit floats
-  ##
+  %% usage: write_float_binary (data, filename)
+  %%
+  %%  open filename and write data to it as 32 bit floats
+  %%
 
   if ((m = nargchk (2,2,nargin)))
     usage (m);
