@@ -30,6 +30,7 @@
 #include <gnuradio/io_signature.h>
 #include <gnuradio/prefs.h>
 #include <stdio.h>
+#include <type_traits>
 #include <iostream>
 #include <stdexcept>
 
