@@ -25,6 +25,7 @@
 
 #include <gnuradio/blocks/udp_sink.h>
 #include <boost/asio.hpp>
+#include <memory>
 
 namespace gr {
   namespace blocks {

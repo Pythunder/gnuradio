@@ -89,7 +89,7 @@ namespace gr {
                                                     boost::asio::ip::resolver_query_base::passive);
         d_endpoint = *resolver.resolve(query);
 
-        d_socket = new boost::asio::ip::udp::socket(d_io_service);
+        d_socket = boost::make_unique<boost::asio::ip::udp::socket>(d_io_service);
         d_socket->open(d_endpoint.protocol());
 
         boost::asio::socket_base::linger loption(true, 0);

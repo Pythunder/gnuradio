@@ -24,7 +24,7 @@
 #define INCLUDED_PATTERNED_INTERLEAVER_IMPL_H
 
 #include <gnuradio/blocks/patterned_interleaver.h>
-#include <boost/foreach.hpp>
+#include <algorithm>
 
 namespace gr {
   namespace blocks {

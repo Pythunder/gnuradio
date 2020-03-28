@@ -26,7 +26,6 @@
 
 #include "stream_mux_impl.h"
 #include <gnuradio/io_signature.h>
-#include <boost/foreach.hpp>
 #include <cstring>
 
 namespace gr {
